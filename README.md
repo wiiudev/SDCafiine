@@ -16,5 +16,7 @@ To replace files eg Smash USA you put it in SD:/0005000010144F00/ which maps to 
 
 ## Credits
 Cafiine creation - chadderz (and MrBean35000vr ?)
+
 SDCafiine creation - golden45 (see https://gbatemp.net/goto/post?id=5680630)
+
 5.5.0/5.5.1 port - NWPlayer123
