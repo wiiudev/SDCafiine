@@ -40,12 +40,13 @@
 		<Unit filename="build/acp_functions.d" />
 		<Unit filename="build/aoc_functions.d" />
 		<Unit filename="build/ax_functions.d" />
-		<Unit filename="build/coreinit_function_patcher.d" />
 		<Unit filename="build/curl_functions.d" />
 		<Unit filename="build/entry.d" />
 		<Unit filename="build/exception_handler.d" />
 		<Unit filename="build/fs_function_patcher.d" />
+		<Unit filename="build/fs_function_utils.d" />
 		<Unit filename="build/fs_functions.d" />
+		<Unit filename="build/fs_utils.d" />
 		<Unit filename="build/function_patcher.d" />
 		<Unit filename="build/gx2_functions.d" />
 		<Unit filename="build/kernel_functions.d" />
@@ -54,8 +55,9 @@
 		<Unit filename="build/main.d" />
 		<Unit filename="build/memory.d" />
 		<Unit filename="build/os_functions.d" />
-		<Unit filename="build/pad_function_patcher.d" />
 		<Unit filename="build/padscore_functions.d" />
+		<Unit filename="build/retain_vars.d" />
+		<Unit filename="build/sd_fat_devoptab.d" />
 		<Unit filename="build/socket_functions.d" />
 		<Unit filename="build/sys_functions.d" />
 		<Unit filename="build/syscalls.d" />
@@ -66,6 +68,10 @@
 		<Unit filename="src/common/kernel_defs.h" />
 		<Unit filename="src/common/loader_defs.h" />
 		<Unit filename="src/common/os_defs.h" />
+		<Unit filename="src/common/retain_vars.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/common/retain_vars.h" />
 		<Unit filename="src/common/types.h" />
 		<Unit filename="src/dynamic_libs/acp_functions.c">
 			<Option compilerVar="CC" />
@@ -121,6 +127,14 @@
 		<Unit filename="src/entry.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="src/fs/fs_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/fs/fs_utils.h" />
+		<Unit filename="src/fs/sd_fat_devoptab.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/fs/sd_fat_devoptab.h" />
 		<Unit filename="src/kernel/kernel_functions.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -133,12 +147,10 @@
 		<Unit filename="src/kernel/syscalls_asm.S" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/main.h" />
-		<Unit filename="src/patcher/coreinit_function_patcher.cpp" />
-		<Unit filename="src/patcher/coreinit_function_patcher.h" />
 		<Unit filename="src/patcher/fs_function_patcher.cpp" />
 		<Unit filename="src/patcher/fs_function_patcher.h" />
-		<Unit filename="src/patcher/pad_function_patcher.cpp" />
-		<Unit filename="src/patcher/pad_function_patcher.h" />
+		<Unit filename="src/patcher/fs_function_utils.cpp" />
+		<Unit filename="src/patcher/fs_function_utils.h" />
 		<Unit filename="src/system/exception_handler.c">
 			<Option compilerVar="CC" />
 		</Unit>
