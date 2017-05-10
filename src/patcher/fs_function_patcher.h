@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (C) 2015 Dimok
+ * Copyright (C) 2016 Maschell
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,29 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#ifndef __MEMORY_H_
-#define __MEMORY_H_
+
+#ifndef _FS_FUNCTION_PATCHER_H
+#define _FS_FUNCTION_PATCHER_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <malloc.h>
+#include "utils/function_patcher.h"
 
-void memoryInitialize(void);
-void memoryRelease(void);
+/* Forward declarations */
+#define MAX_CLIENT 32
+#define DEBUG_LOG 1
 
-void * MEM2_alloc(u32 size, u32 align);
-void MEM2_free(void *ptr);
+struct bss_t {
+    char mount_base[255];
+    int sd_mount[MAX_CLIENT];
+    int pClient_fs[MAX_CLIENT];
+};
 
-void * MEM1_alloc(u32 size, u32 align);
-void MEM1_free(void *ptr);
+#define bss_ptr (*(struct bss_t **)0x100000e4)
+#define bss (*bss_ptr)
 
-void * MEMBucket_alloc(u32 size, u32 align);
-void MEMBucket_free(void *ptr);
+extern hooks_magic_t method_hooks_fs[];
+extern u32 method_hooks_size_fs;
+extern volatile unsigned int method_calls_fs[];
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // __MEMORY_H_
+#endif /* _FS_FUNCTION_PATCHER_H */

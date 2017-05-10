@@ -11,6 +11,11 @@ extern "C" {
 
 //! C wrapper for our C++ functions
 int Menu_Main(void);
+void deInit(void);
+void ApplyPatches(void);
+void RestorePatches();
+
+s32 isInMiiMakerHBL();
 
 #ifdef __cplusplus
 }

@@ -33,13 +33,13 @@ BUILD		:=	build
 BUILD_DBG	:=	$(TARGET)_dbg
 SOURCES		:=	src \
 				src/dynamic_libs \
-				src/fs \
-				src/game \
 				src/kernel \
 				src/patcher \
 				src/common \
+				src/fs \
 				src/system \
 				src/utils \
+
 DATA		:=	
 
 INCLUDES	:=  src
