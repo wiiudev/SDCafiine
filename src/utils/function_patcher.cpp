@@ -302,7 +302,7 @@ unsigned int GetAddressOfFunction(const char * functionName,unsigned int library
         return 0;
     }
 
-    if((u32)(*(volatile unsigned int*)(real_addr) & 0x48000002) == 0x48000000)
+    if((library == LIB_NN_ACP) && (u32)(*(volatile unsigned int*)(real_addr) & 0x48000002) == 0x48000000)
     {
         unsigned int address_diff = (u32)(*(volatile unsigned int*)(real_addr) & 0x03FFFFFC);
         if((address_diff & 0x03000000) == 0x03000000) {

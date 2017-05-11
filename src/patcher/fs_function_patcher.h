@@ -12,7 +12,8 @@ extern "C" {
 #define DEBUG_LOG 1
 
 struct bss_t {
-    char mount_base[255];
+    char content_mount_base[255];
+    char aoc_mount_base[255];
     int sd_mount[MAX_CLIENT];
     int pClient_fs[MAX_CLIENT];
 };

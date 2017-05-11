@@ -14,6 +14,7 @@ int Menu_Main(void);
 void deInit(void);
 void ApplyPatches(void);
 void RestorePatches();
+void Init_Log(void);
 
 s32 isInMiiMakerHBL();
 

@@ -10,9 +10,7 @@
 
 DECL(int, FSInit, void) {
     if(DEBUG_LOG) log_print("FSInit\n");
-    if ((int)bss_ptr == 0x0a000000)
-    {
-        gReadIPfromSD = 0;
+    if ((int)bss_ptr == 0x0a000000) {
          // allocate memory for our stuff
         void *mem_ptr = memalign(0x40, sizeof(struct bss_t));
         if(!mem_ptr)
@@ -24,8 +22,10 @@ DECL(int, FSInit, void) {
         // setup exceptions, has to be done once per core
         setup_os_exceptions();
 
-        sprintf(bss.mount_base,"%s/%016llX",CAFE_OS_SD_PATH,OSGetTitleID());
-        if(DEBUG_LOG) log_printf("bss.mount_base: %s\n",bss.mount_base);
+        sprintf(bss.content_mount_base,"%s%s/%016llX/content",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
+        sprintf(bss.aoc_mount_base,"%s%s/%016llX/aoc",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
+        if(DEBUG_LOG) log_printf("bss.content_mount_base: %s\n",bss.content_mount_base);
+        if(DEBUG_LOG) log_printf("bss.aoc_mount_base: %s\n",bss.aoc_mount_base);    
     }
     return real_FSInit();
 }
@@ -51,20 +51,24 @@ DECL(int, FSDelClient, void *pClient) {
 }
 
 DECL(int, FSGetStatAsync, void *pClient, void *pCmd, const char *path, void *stats, int error, FSAsyncParams *asyncParams) {
-    if(DEBUG_LOG) log_print("FSGetStatAsync\n");
+    if(DEBUG_LOG) log_printf("FSGetStatAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
+    if(DEBUG_LOG) log_printf("after getNewPath FSGetStatAsync\n");
     const char * use_path = path;
     if(newPath != NULL){
         use_path = newPath;
     }
+    if(DEBUG_LOG) log_printf("before real_FSOpenFileAsync\n");
     int res = real_FSGetStatAsync(pClient, pCmd, use_path, stats, error, asyncParams);
+    if(DEBUG_LOG) log_printf("after real_FSOpenFileAsync\n");
     if(newPath != NULL){free(newPath); newPath = NULL;}
     return res;
 }
 
 DECL(int, FSOpenFileAsync, void *pClient, void *pCmd, const char *path, const char *mode, int *handle, int error, FSAsyncParams *asyncParams) {
-    if(DEBUG_LOG) log_print("FSOpenFileAsync\n");
+    if(DEBUG_LOG) log_printf("FSOpenFileAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
+    if(DEBUG_LOG) log_printf("after getNewPath FSOpenFileAsync\n");
     const char * use_path = path;
     if(newPath != NULL){
         use_path = newPath;
@@ -75,8 +79,9 @@ DECL(int, FSOpenFileAsync, void *pClient, void *pCmd, const char *path, const ch
 }
 
 DECL(int, FSOpenDirAsync, void *pClient, void* pCmd, const char *path, int *handle, int error, FSAsyncParams *asyncParams) {
-    if(DEBUG_LOG) log_print("FSOpenDirAsync\n");
+    if(DEBUG_LOG) log_printf("FSOpenDirAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
+    if(DEBUG_LOG) log_printf("after getNewPath FSOpenDirAsync\n");
     const char * use_path = path;
     if(newPath != NULL){
         use_path = newPath;
@@ -87,8 +92,9 @@ DECL(int, FSOpenDirAsync, void *pClient, void* pCmd, const char *path, int *hand
 }
 
 DECL(int, FSChangeDirAsync, void *pClient, void *pCmd, const char *path, int error, FSAsyncParams *asyncParams) {
-    if(DEBUG_LOG) log_print("FSChangeDirAsync\n");
+    if(DEBUG_LOG) log_printf("FSChangeDirAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
+    if(DEBUG_LOG) log_printf("after getNewPath FSChangeDirAsync\n");
     const char * use_path = path;
     if(newPath != NULL){
         use_path = newPath;
@@ -104,7 +110,7 @@ hooks_magic_t method_hooks_fs[] __attribute__((section(".data"))) = {
     MAKE_MAGIC(FSDelClient,         LIB_CORE_INIT,  STATIC_FUNCTION),
     MAKE_MAGIC(FSGetStatAsync,      LIB_CORE_INIT,  STATIC_FUNCTION),
     MAKE_MAGIC(FSOpenFileAsync,     LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(FSOpenFileAsync,     LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSOpenDirAsync,      LIB_CORE_INIT,  STATIC_FUNCTION),
     MAKE_MAGIC(FSChangeDirAsync,    LIB_CORE_INIT,  STATIC_FUNCTION),
 };
 

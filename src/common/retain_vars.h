@@ -1,7 +1,7 @@
 #ifndef RETAINS_VARS_H_
 #define RETAINS_VARS_H_
-
 #include <gctypes.h>
-extern u8 gReadIPfromSD;
+extern char ipFromSd[16];
+extern u8 hasReadIP;
 
 #endif // RETAINS_VARS_H_

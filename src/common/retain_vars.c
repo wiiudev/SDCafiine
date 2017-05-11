@@ -1,2 +1,3 @@
 #include <gctypes.h>
-u8 gReadIPfromSD __attribute__((section(".data"))) = 0;
+char ipFromSd[16] __attribute__((section(".data")));
+u8 hasReadIP __attribute__((section(".data"))) = 0;

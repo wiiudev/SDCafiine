@@ -12,7 +12,6 @@ int client_num(void *pClient);
 int getClientAndInitSD(void *pClient, void *pCmd);
 int is_gamefile(const char *path);
 char * getNewPath(void *pClient, void *pCmd, const char *path);
-void readIPfromSD(void *pClient, void *pCmd);
 
 #ifdef __cplusplus
 }

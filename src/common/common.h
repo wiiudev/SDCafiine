@@ -8,6 +8,7 @@ extern "C" {
 #include "os_defs.h"
 
 #define CAFE_OS_SD_PATH             "/vol/external01"
+#define GAME_MOD_FOLDER		        "/sdcafiine"
 #define SD_PATH                     "sd:"
 #define WIIU_PATH                   "/wiiu"
 
