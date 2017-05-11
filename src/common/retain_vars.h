@@ -4,6 +4,6 @@
 #include "utils/FileReplacer.h"
 extern char ipFromSd[16];
 extern u8 hasReadIP;
-extern u8 gSDInitDone;
+extern volatile u8 gSDInitDone;
 extern FileReplacer* replacer;
 #endif // RETAINS_VARS_H_

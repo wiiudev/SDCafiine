@@ -881,7 +881,11 @@ static int sd_fat_add_device (const char *name, const char *mount_path, void *pC
     strcpy(devname, name);
 
     // create private data
-    sd_fat_private_t *priv = (sd_fat_private_t *)malloc(sizeof(sd_fat_private_t) + strlen(mount_path) + 1);
+    int mount_path_len = 0;
+    if(mount_path != NULL){
+        mount_path_len = strlen(mount_path);
+    }
+    sd_fat_private_t *priv = (sd_fat_private_t *)malloc(sizeof(sd_fat_private_t) + mount_path_len + 1);
     if(!priv) {
         free(dev);
         errno = ENOMEM;
@@ -889,7 +893,9 @@ static int sd_fat_add_device (const char *name, const char *mount_path, void *pC
     }
 
     devpath = (char*)(priv+1);
-    strcpy(devpath, mount_path);
+    if(mount_path != NULL){
+        strcpy(devpath, mount_path);
+    }
 
     // setup private data
     priv->mount_path = devpath;
@@ -951,11 +957,13 @@ static int sd_fat_remove_device (const char *path, void **pClient, void **pCmd, 
                 if(devoptab->deviceData)
                 {
                     sd_fat_private_t *priv = (sd_fat_private_t *)devoptab->deviceData;
-                    *pClient = priv->pClient;
-                    *pCmd = priv->pCmd;
-                    *mountPath = (char*) malloc(strlen(priv->mount_path)+1);
-                    if(*mountPath)
-                        strcpy(*mountPath, priv->mount_path);
+                    if(pClient != NULL) *pClient = priv->pClient;
+                    if(pCmd != NULL) *pCmd = priv->pCmd;
+                    if(mountPath != NULL){
+                        *mountPath = (char*) malloc(strlen(priv->mount_path)+1);
+                        if(*mountPath)
+                            strcpy(*mountPath, priv->mount_path);
+                    }
                     if(priv->pMutex)
                         free(priv->pMutex);
                     free(devoptab->deviceData);
@@ -1018,4 +1026,12 @@ int unmount_sd_fat(const char *path)
         //FSShutdown();
     }
     return result;
+}
+
+int mount_fake(){
+    return sd_fat_add_device("fake", NULL, NULL, NULL);
+}
+
+int unmount_fake(){
+    return sd_fat_remove_device ("fake", NULL,NULL,NULL);
 }

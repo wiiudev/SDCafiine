@@ -30,6 +30,8 @@ extern "C" {
 
 int mount_sd_fat(const char *path);
 int unmount_sd_fat(const char *path);
+int mount_fake();
+int unmount_fake();
 
 #ifdef __cplusplus
 }

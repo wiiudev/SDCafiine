@@ -114,6 +114,8 @@ DECL(void, __PPCExit, void){
     }
     gSDInitDone = 0;
     log_printf("__PPCExit\n");
+    unmount_fake();
+    unmount_sd_fat("sd");
     real___PPCExit();
 }
 

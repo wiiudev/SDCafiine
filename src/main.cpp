@@ -23,6 +23,7 @@
 #include "fs/sd_fat_devoptab.h"
 #include "fs/CFile.hpp"
 #include "common/retain_vars.h"
+#include "system/exception_handler.h"
 
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
@@ -42,9 +43,14 @@ extern "C" int Menu_Main(void)
 
     log_init("192.168.0.181");
 
-    log_printf("Mount SD partition\n");
+    setup_os_exceptions();
 
+    log_printf("Mount fake devo device\n");
+    mount_fake();
+
+    log_printf("Mount SD partition\n");
     Init_SD();
+
     Init_Log();
 
     SetupKernelCallback();
@@ -97,6 +103,7 @@ void deInit(){
     RestorePatches();
     log_deinit();
     unmount_sd_fat("sd");
+    unmount_fake();
     gSDInitDone = 0;
 }
 
@@ -119,6 +126,7 @@ void Init_SD() {
         if(mount_sd_fat("sd") == 0){
             gSDInitDone = 1;
         }
+
     //}else{
     //    log_printf("Using IOSUHAX for (some) sd access\n");
     //    fatInitDefault();
