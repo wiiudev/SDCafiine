@@ -183,7 +183,7 @@ static int sd_fat_open_r (struct _reent *r, void *fileStruct, const char *path, 
 }
 
 
-static int sd_fat_close_r (struct _reent *r, int fd)
+static int sd_fat_close_r (struct _reent *r, void *fd)
 {
     sd_fat_file_state_t *file = (sd_fat_file_state_t *)fd;
     if(!file->dev) {
@@ -205,7 +205,7 @@ static int sd_fat_close_r (struct _reent *r, int fd)
     return 0;
 }
 
-static off_t sd_fat_seek_r (struct _reent *r, int fd, off_t pos, int dir)
+static off_t sd_fat_seek_r (struct _reent *r, void* fd, off_t pos, int dir)
 {
     sd_fat_file_state_t *file = (sd_fat_file_state_t *)fd;
     if(!file->dev) {
@@ -243,7 +243,7 @@ static off_t sd_fat_seek_r (struct _reent *r, int fd, off_t pos, int dir)
     return result;
 }
 
-static ssize_t sd_fat_write_r (struct _reent *r, int fd, const char *ptr, size_t len)
+static ssize_t sd_fat_write_r (struct _reent *r, void *fd, const char *ptr, size_t len)
 {
     sd_fat_file_state_t *file = (sd_fat_file_state_t *)fd;
     if(!file->dev) {
@@ -301,7 +301,7 @@ static ssize_t sd_fat_write_r (struct _reent *r, int fd, const char *ptr, size_t
     return done;
 }
 
-static ssize_t sd_fat_read_r (struct _reent *r, int fd, char *ptr, size_t len)
+static ssize_t sd_fat_read_r (struct _reent *r, void* fd, char *ptr, size_t len)
 {
     sd_fat_file_state_t *file = (sd_fat_file_state_t *)fd;
     if(!file->dev) {
@@ -360,7 +360,7 @@ static ssize_t sd_fat_read_r (struct _reent *r, int fd, char *ptr, size_t len)
 }
 
 
-static int sd_fat_fstat_r (struct _reent *r, int fd, struct stat *st)
+static int sd_fat_fstat_r (struct _reent *r, void* fd, struct stat *st)
 {
     sd_fat_file_state_t *file = (sd_fat_file_state_t *)fd;
     if(!file->dev) {
@@ -398,7 +398,7 @@ static int sd_fat_fstat_r (struct _reent *r, int fd, struct stat *st)
     return 0;
 }
 
-static int sd_fat_ftruncate_r (struct _reent *r, int fd, off_t len)
+static int sd_fat_ftruncate_r (struct _reent *r, void* fd, off_t len)
 {
     sd_fat_file_state_t *file = (sd_fat_file_state_t *)fd;
     if(!file->dev) {
@@ -420,7 +420,7 @@ static int sd_fat_ftruncate_r (struct _reent *r, int fd, off_t len)
     return 0;
 }
 
-static int sd_fat_fsync_r (struct _reent *r, int fd)
+static int sd_fat_fsync_r (struct _reent *r, void* fd)
 {
     sd_fat_file_state_t *file = (sd_fat_file_state_t *)fd;
     if(!file->dev) {
@@ -849,10 +849,12 @@ static const devoptab_t devops_sd_fat = {
     sd_fat_statvfs_r,
     sd_fat_ftruncate_r,
     sd_fat_fsync_r,
+    NULL,  /* Device data */
     NULL, /* sd_fat_chmod_r */
     NULL, /* sd_fat_fchmod_r */
-    NULL  /* Device data */
+    NULL  /* sd_fat_rmdir_r */
 };
+
 
 static int sd_fat_add_device (const char *name, const char *mount_path, void *pClient, void *pCmd)
 {
