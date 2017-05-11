@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 extern "C" {
-  // Get declaration for f(int i, char c, float x)
   #include "utils/logger.h"
   #include "common/common.h"
 }
@@ -18,8 +17,7 @@ Directory::~Directory(){
 	}
 }
 
-int Directory::getSize()
-{
+int Directory::getSize(){
 	int dir_size = sizeof(Directory);
 	int file_size = sizeof(std::string) * files.capacity();
 	for(unsigned int i = 0; i < files.size(); i++){
@@ -30,16 +28,14 @@ int Directory::getSize()
 	for(unsigned int i = 0; i < folder.size(); i++){
 		size += folder[i]->getSize();
 	}
-	char log_size[100];
-	size += dir_size +file_size + folder_size;
-	sprintf(log_size,"Size of %s: %d Bytes | Dirsize: %d | Folder %d(%d Bytes) Files: %d (%d Bytes)",getFolderName().c_str(),size,dir_size,folder.size(),folder_size,files.size(),file_size);
+	//strfmt("Size of %s: %d Bytes | Dirsize: %d | Folder %d(%d Bytes) Files: %d (%d Bytes)",getFolderName().c_str(),size,dir_size,folder.size(),folder_size,files.size(),file_size);
 	return size;
 }
-
 
 void Directory::addFile(std::string name_){
 	files.push_back(name_);
 }
+
 void Directory::addFolder(Directory * dir){
 	folder.push_back(dir);
 }
@@ -77,7 +73,6 @@ bool Directory::checkFile(std::string filename){
 	}
 	return false;
 }
-
 
 Directory * Directory::getFolder(std::string foldername){
 	Directory * result = NULL;
@@ -125,7 +120,3 @@ std::string Directory::getFileList(){
 	}
 	return strBuffer;
 }
-
-
-
-

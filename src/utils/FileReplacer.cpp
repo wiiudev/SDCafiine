@@ -4,10 +4,75 @@
 #include <string.h>
 #include <vector>
 #include <malloc.h>
-#include "common/common.h"
 #include "fs/fs_utils.c"
 
+FileReplacer::FileReplacer(std::string path){
+    int entries = 0;
+    dir_all = new Directory("");
+    if(read_dir(path, dir_all, &entries)){
+        log_printf("Found %d entries\n",entries);
+        dir_all->printFolderRecursive("");
+    }
+}
+
+FileReplacer::~FileReplacer(){
+	delete dir_all;
+}
+
+int FileReplacer::getSize(){
+	int size = sizeof(FileReplacer);
+	size += dir_all->getSize();
+	return size;
+}
+
+bool FileReplacer::read_dir(const std::string & path , Directory* dir, int * entries){
+	std::vector<std::string *> dirlist;
+
+    struct dirent *dirent = NULL;
+	DIR *dir_ = opendir(path.c_str());
+	if (dir_ == NULL){
+		return false;
+	}
+	while ((dirent = readdir(dir_)) != 0){
+		bool isDir = dirent->d_type & DT_DIR;
+		const char *filename = dirent->d_name;
+
+        if(isDir){
+            dirlist.push_back(new std::string(filename));
+        }else{
+            if(entries != NULL){ (*entries)++; }
+            dir->addFile(filename);
+        }
+    }
+    closedir(dir_);
+
+    for(u32 i = 0; i < dirlist.size(); i++){
+        Directory * dir_new = new Directory(*dirlist[i]);
+        dir->addFolder(dir_new);
+        read_dir((path + "/"+ *dirlist[i]),dir_new,entries);
+    }
+
+    for(u32 i = 0; i < dirlist.size(); i++){
+        delete dirlist[i];
+    }
+
+	return true;
+}
+
+bool FileReplacer::isFileExisting(std::string param){
+    log_printf("Checking if %s exists.\n",param.c_str());
+	if(dir_all != 0){
+		if(dir_all->isInFolder(param)){
+			return true;
+		}
+	}
+	return false;
+}
+
 /*
+* Loading cached filelist from the sd card.
+*/
+/* with untested changes
 FileReplacer::FileReplacer(std::string path,std::string filename,void * pClient,void * pCmd){
 	bool result = false;
 	dir_all = new Directory("content");
@@ -19,34 +84,10 @@ FileReplacer::FileReplacer(std::string path,std::string filename,void * pClient,
     }else{
         //dir_all->printFolderRecursive("");
     }
-}*/
-
-FileReplacer::FileReplacer(std::string path){
-    int entries = 0;
-
-    dir_all = new Directory("");
-    read_dir(path, dir_all, &entries);
-    log_printf("Found %d entries\n",entries);
-    dir_all->printFolderRecursive("");
 }
 
-std::string FileReplacer::getFileListAsString(){
-	return dir_all->getFileList();
-}
 
-int FileReplacer::getSize()
-{
-	int size = sizeof(FileReplacer);
-	size += dir_all->getSize();
-	return size;
-}
 
-FileReplacer::~FileReplacer()
-{
-	delete dir_all;
-}
-
-/* with untested changes
 bool FileReplacer::readFromFile(void *pClient, void *pCmd, const std::string & path , Directory* dir){
 	s32 handle = 0;
 	FSStat stats;
@@ -88,49 +129,10 @@ bool FileReplacer::readFromFile(void *pClient, void *pCmd, const std::string & p
         ptr = strtok(NULL, delimiter);
     }
     return true;
-}*/
-
-int FileReplacer::read_dir(const std::string & path , Directory* dir, int * entries){
-	std::vector<std::string *> dirlist;
-
-    struct dirent *dirent = NULL;
-	DIR *dir_ = opendir(path.c_str());
-	if (dir_ == NULL){
-        log_printf("dir not found..%s\n",path.c_str());
-		return -1;
-	}
-	while ((dirent = readdir(dir_)) != 0){
-		bool isDir = dirent->d_type & DT_DIR;
-		const char *filename = dirent->d_name;
-
-        if(isDir){
-            dirlist.push_back(new std::string(filename));
-        }else{
-            (*entries)++;
-            dir->addFile(filename);
-        }
-    }
-    closedir(dir_);
-
-    for(u32 i = 0; i < dirlist.size(); i++){
-        Directory * dir_new = new Directory(*dirlist[i]);
-        dir->addFolder(dir_new);
-        read_dir((path + "/"+ *dirlist[i]),dir_new,entries);
-    }
-
-    for(u32 i = 0; i < dirlist.size(); i++){
-        delete dirlist[i];
-    }
-
-	return 0;
 }
 
-int FileReplacer::isFileExisting(std::string param){
-    log_printf("Checking if %s exists.\n",param.c_str());
-	if(dir_all != 0){
-		if(dir_all->isInFolder(param)){
-			return 0;
-		}
-	}
-	return -1;
+std::string FileReplacer::getFileListAsString(){
+	return dir_all->getFileList();
 }
+
+*/

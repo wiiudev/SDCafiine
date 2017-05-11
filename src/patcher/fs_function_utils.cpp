@@ -143,7 +143,7 @@ char * getNewPath(void *pClient, void *pCmd, const char *path){
                 replacer = new FileReplacer(path.c_str());
             }
             if(replacer != NULL){
-                if(replacer->isFileExisting(pathForCheck) == 0){
+                if(replacer->isFileExisting(pathForCheck)){
                     log_printf("using new path -> %s\n",newPath);
                     return newPath;
                 }

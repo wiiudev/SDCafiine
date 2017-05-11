@@ -10,18 +10,18 @@ extern "C" {
   #include "dynamic_libs/fs_functions.h"
 }
 
-class FileReplacer
-{
+class FileReplacer{
    public:
-	  //FileReplacer(std::string path,std::string content,std::string filename,void * pClient,void * pCmd);
       FileReplacer(std::string path);
 	  ~FileReplacer();
-	  bool readFromFile(void *pClient, void *pCmd, const std::string & path , Directory* dir);
-	  int read_dir(const std::string  & path, Directory * dir,int * entries);
-	  int isFileExisting(std::string param);
+	  bool read_dir(const std::string  & path, Directory * dir,int * entries);
+	  bool isFileExisting(std::string param);
 	  int getSize();
-	  std::string getFileListAsString();
 	private:
 	  Directory * dir_all;
+
+      //FileReplacer(std::string path,std::string content,std::string filename,void * pClient,void * pCmd);
+      //std::string getFileListAsString();
+      //bool readFromFile(void *pClient, void *pCmd, const std::string & path , Directory* dir);
 };
 #endif // __FILE_REPLACER_H_
