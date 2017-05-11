@@ -12,42 +12,32 @@
 
 DECL(int, FSInit, void) {
     if(DEBUG_LOG) log_print("FSInit\n");
-    if ((int)bss_ptr == 0x0a000000) {
-         // allocate memory for our stuff
-        void *mem_ptr = memalign(0x40, sizeof(struct bss_t));
-        if(!mem_ptr)
-            return real_FSInit();
-        // copy pointer
-        bss_ptr = (bss_t*)mem_ptr;
-        memset(bss_ptr, 0, sizeof(struct bss_t));
 
-        // setup exceptions, has to be done once per core
-        setup_os_exceptions();
+    // setup exceptions, has to be done once per core
+    setup_os_exceptions();
 
-        sprintf(bss.content_mount_base,"%s%s/%016llX/content",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
-        sprintf(bss.aoc_mount_base,"%s%s/%016llX/aoc",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
-        if(DEBUG_LOG) log_printf("bss.content_mount_base: %s\n",bss.content_mount_base);
-        if(DEBUG_LOG) log_printf("bss.aoc_mount_base: %s\n",bss.aoc_mount_base);
-    }
+    sprintf(fspatchervars.content_mount_base,"%s%s/%016llX/content",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
+    sprintf(fspatchervars.aoc_mount_base,"%s%s/%016llX/aoc",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
+    if(DEBUG_LOG) log_printf("bss.content_mount_base: %s\n",fspatchervars.content_mount_base);
+    if(DEBUG_LOG) log_printf("bss.aoc_mount_base: %s\n",fspatchervars.aoc_mount_base);
+
     return real_FSInit();
 }
 
-DECL(int, FSAddClientEx, void *r3, void *r4, void *r5) {
-    int res = real_FSAddClientEx(r3, r4, r5);
+DECL(int, FSAddClientEx, void *pClient, s32 unk_zero_param, s32 errHandling) {
+    int res = real_FSAddClientEx(pClient, unk_zero_param, errHandling);
 
-    if ((int)bss_ptr != 0x0A000000 && res >= 0) {
-        client_num_alloc(r3);
+    if (res >= 0) {
+        client_num_alloc(pClient);
     }
 
     return res;
 }
 
 DECL(int, FSDelClient, void *pClient) {
-    if ((int)bss_ptr != 0x0A000000) {
-        int client = client_num(pClient);
-        if (client < MAX_CLIENT && client >= 0) {
-            client_num_free(client);
-        }
+    int client = client_num(pClient);
+    if (client < MAX_CLIENT && client >= 0) {
+        client_num_free(client);
     }
     return real_FSDelClient(pClient);
 }
@@ -109,9 +99,7 @@ DECL(int, FSChangeDirAsync, void *pClient, void *pCmd, const char *path, int err
 DECL(void, __PPCExit, void){
     delete replacer;
     replacer = NULL;
-    if((int)bss_ptr != 0x0A000000){
-        free(bss_ptr);
-    }
+
     gSDInitDone = 0;
     log_printf("__PPCExit\n");
     unmount_fake();

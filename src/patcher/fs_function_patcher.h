@@ -11,7 +11,7 @@ extern "C" {
 #define MAX_CLIENT 32
 #define DEBUG_LOG 0
 
-struct bss_t {
+struct fs_patcher_utils {
     char content_mount_base[255];
     char aoc_mount_base[255];
     char replacer_path[255];

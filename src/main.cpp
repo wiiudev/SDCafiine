@@ -55,6 +55,8 @@ extern "C" int Menu_Main(void)
 
     SetupKernelCallback();
 
+    memset(&fspatchervars,0,sizeof(fspatchervars));
+
     //Reset everything when were going back to the Mii Maker
     if(!isFirstBoot && isInMiiMakerHBL()){
         log_print("Returing to the Homebrew Launcher!\n");

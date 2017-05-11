@@ -13,44 +13,43 @@ int client_num_alloc(void *pClient) {
     int i;
 
     for (i = 0; i < MAX_CLIENT; i++)
-        if (bss.pClient_fs[i] == 0) {
-            bss.pClient_fs[i] = (int)pClient;
+        if (fspatchervars.pClient_fs[i] == 0) {
+            fspatchervars.pClient_fs[i] = (int)pClient;
             return i;
         }
     return -1;
 }
 
 void client_num_free(int client) {
-    bss.pClient_fs[client] = 0;
-    bss.sd_mount[client] = 0;
+    fspatchervars.pClient_fs[client] = 0;
+    fspatchervars.sd_mount[client] = 0;
 }
 
 int client_num(void *pClient) {
     int i;
     for (i = 0; i < MAX_CLIENT; i++)
-        if (bss.pClient_fs[i] == (int)pClient)
+        if (fspatchervars.pClient_fs[i] == (int)pClient)
             return i;
     return -1;
 }
 
 int getClientAndInitSD(void *pClient, void *pCmd){
     if(DEBUG_LOG) log_print("getClientAndInitSD\n");
-    if ((int)bss_ptr != 0x0A000000) {
-        int client = client_num(pClient);
-        if (client < MAX_CLIENT && client >= 0) {
-            if(DEBUG_LOG) log_printf("found client: %d\n",client);
-            if (!bss.sd_mount[client]){
-                if(DEBUG_LOG) log_printf("SD is not mounted for this client\n");
-                if(MountFS(pClient, pCmd,0) == 0){
-                    log_printf("SD mounting was successful\n");
-                    bss.sd_mount[client] = 1;
-                }else{
-                    bss.sd_mount[client] = 2;
-                    log_printf("SD mounting failed\n");
-                }
+
+    int client = client_num(pClient);
+    if (client < MAX_CLIENT && client >= 0) {
+        if(DEBUG_LOG) log_printf("found client: %d\n",client);
+        if (!fspatchervars.sd_mount[client]){
+            if(DEBUG_LOG) log_printf("SD is not mounted for this client\n");
+            if(MountFS(pClient, pCmd,0) == 0){
+                log_printf("SD mounting was successful\n");
+                fspatchervars.sd_mount[client] = 1;
+            }else{
+                fspatchervars.sd_mount[client] = 2;
+                log_printf("SD mounting failed\n");
             }
-            return client;
         }
+        return client;
     }
     return -1;
 }
@@ -83,7 +82,7 @@ int is_gamefile(const char *path) {
 
 char * getNewPath(void *pClient, void *pCmd, const char *path){
     int gameFile = is_gamefile(path);
-    if(gameFile && (int)bss_ptr != 0x0A000000 && gSDInitDone) {
+    if(gameFile && gSDInitDone) {
         if(DEBUG_LOG) log_printf("getNewPath %s\n", path);
         int path_offset = 0;
 
@@ -107,13 +106,13 @@ char * getNewPath(void *pClient, void *pCmd, const char *path){
             char * pathForCheckInternal = (char*)path + 13 + path_offset;
             if(pathForCheckInternal[0] == '/') pathForCheckInternal++; //Skip double slash
 
-            newPath = (char*)malloc(sizeof(char) * (strlen(bss.content_mount_base) + strlen(pathForCheckInternal) + 2));
+            newPath = (char*)malloc(sizeof(char) * (strlen(fspatchervars.content_mount_base) + strlen(pathForCheckInternal) + 2));
             if(newPath == NULL){
                 log_printf("malloc failed\n");
                 return NULL;
             }
 
-            sprintf(newPath,"%s/%s",bss.content_mount_base,pathForCheckInternal);
+            sprintf(newPath,"%s/%s",fspatchervars.content_mount_base,pathForCheckInternal);
             pathForCheck = (char*)malloc(sizeof(char) * (strlen(pathForCheckInternal) + sizeof("content/")));
             sprintf(pathForCheck,"content/%s",pathForCheckInternal);
         } else if (gameFile == 2) {
@@ -127,12 +126,12 @@ char * getNewPath(void *pClient, void *pCmd, const char *path){
             char * pathForCheckInternal = (char*)path + 5 + aocFolderLength + path_offset;
             if(pathForCheckInternal[0] == '/') pathForCheckInternal++; //Skip double slash
 
-            newPath = (char*)malloc(sizeof(char) * (strlen(bss.aoc_mount_base) + strlen(pathForCheckInternal) + 2));
+            newPath = (char*)malloc(sizeof(char) * (strlen(fspatchervars.aoc_mount_base) + strlen(pathForCheckInternal) + 2));
             if(newPath == NULL){
                 log_printf("malloc failed\n");
                 return NULL;
             }
-            sprintf(newPath,"%s/%s",bss.aoc_mount_base,pathForCheckInternal);
+            sprintf(newPath,"%s/%s",fspatchervars.aoc_mount_base,pathForCheckInternal);
             pathForCheck = (char*)malloc(sizeof(char) * (strlen(pathForCheckInternal) + sizeof("aoc/")));
             sprintf(pathForCheck,"aoc/%s",pathForCheckInternal);
         }
