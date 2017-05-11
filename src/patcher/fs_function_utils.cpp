@@ -2,8 +2,10 @@
 #include <string.h>
 #include <malloc.h>
 #include "common/retain_vars.h"
+#include "utils/FileReplacer.h"
 #include "fs_function_patcher.h"
 #include "utils/logger.h"
+#include "utils/StringTools.h"
 #include "fs_function_utils.h"
 #include "fs/fs_utils.h"
 
@@ -53,7 +55,7 @@ int getClientAndInitSD(void *pClient, void *pCmd){
     return -1;
 }
 
-int is_gamefile(const char *path) {    
+int is_gamefile(const char *path) {
     // In case the path starts by "//" and not "/" (some games do that ... ...)
     if (path[0] == '/' && path[1] == '/')
         path = &path[1];
@@ -80,9 +82,9 @@ int is_gamefile(const char *path) {
 
 
 char * getNewPath(void *pClient, void *pCmd, const char *path){
-    if(DEBUG_LOG) log_printf("getNewPath %s\n", path); 
     int gameFile = is_gamefile(path);
-    if(gameFile && (int)bss_ptr != 0x0A000000) {
+    if(gameFile && (int)bss_ptr != 0x0A000000 && gSDInitDone) {
+        if(DEBUG_LOG) log_printf("getNewPath %s\n", path);
         int path_offset = 0;
 
         // In case the path starts by "//" and not "/" (some games do that ... ...)
@@ -94,7 +96,7 @@ char * getNewPath(void *pClient, void *pCmd, const char *path){
             path_offset = -1;
 
         char * newPath;
-
+        char * pathForCheck;
         if(gameFile == 1) {
             //content
 
@@ -102,15 +104,18 @@ char * getNewPath(void *pClient, void *pCmd, const char *path){
             if(path[13 + path_offset] == '.' && path[14 + path_offset] == '/') {
                 path_offset += 2;
             }
-            char * pathfoo = (char*)path + 13 + path_offset;
-            if(pathfoo[0] == '/') pathfoo++; //Skip double slash
+            char * pathForCheckInternal = (char*)path + 13 + path_offset;
+            if(pathForCheckInternal[0] == '/') pathForCheckInternal++; //Skip double slash
 
-            newPath = (char*)malloc(sizeof(char) * (strlen(bss.content_mount_base) + strlen(pathfoo) + 2));
+            newPath = (char*)malloc(sizeof(char) * (strlen(bss.content_mount_base) + strlen(pathForCheckInternal) + 2));
             if(newPath == NULL){
-                if(DEBUG_LOG) log_printf("malloc failed\n");
+                log_printf("malloc failed\n");
                 return NULL;
             }
-            sprintf(newPath,"%s/%s",bss.content_mount_base,pathfoo);
+
+            sprintf(newPath,"%s/%s",bss.content_mount_base,pathForCheckInternal);
+            pathForCheck = (char*)malloc(sizeof(char) * (strlen(pathForCheckInternal) + sizeof("content/")));
+            sprintf(pathForCheck,"content/%s",pathForCheckInternal);
         } else if (gameFile == 2) {
             //aoc
             int aocFolderLength = 1;
@@ -119,26 +124,32 @@ char * getNewPath(void *pClient, void *pCmd, const char *path){
                 aocFolderLength++;
                 aocFolderLengthCheck++;
             }
-            char * pathfoo = (char*)path + 5 + aocFolderLength + path_offset;
-            if(pathfoo[0] == '/') pathfoo++; //Skip double slash
+            char * pathForCheckInternal = (char*)path + 5 + aocFolderLength + path_offset;
+            if(pathForCheckInternal[0] == '/') pathForCheckInternal++; //Skip double slash
 
-            newPath = (char*)malloc(sizeof(char) * (strlen(bss.aoc_mount_base) + strlen(pathfoo) + 2));
+            newPath = (char*)malloc(sizeof(char) * (strlen(bss.aoc_mount_base) + strlen(pathForCheckInternal) + 2));
             if(newPath == NULL){
-                if(DEBUG_LOG) log_printf("malloc failed\n");
+                log_printf("malloc failed\n");
                 return NULL;
             }
-            sprintf(newPath,"%s/%s",bss.aoc_mount_base,pathfoo);
+            sprintf(newPath,"%s/%s",bss.aoc_mount_base,pathForCheckInternal);
+            pathForCheck = (char*)malloc(sizeof(char) * (strlen(pathForCheckInternal) + sizeof("aoc/")));
+            sprintf(pathForCheck,"aoc/%s",pathForCheckInternal);
         }
 
         if(getClientAndInitSD(pClient,pCmd) != -1){
-            FSStat tmp_stats;
-            if (FSGetStat(pClient, pCmd, newPath, &tmp_stats, -1) == 0) {
-                log_printf("using new path -> %s\n",newPath);
-                return newPath;
-            }else{
-                log_printf("using old path -> %s\n",path);
+            if(replacer == NULL){
+                std::string path  = strfmt("%s%s/%016llX/",SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
+                log_printf("Creating new file replacer %s\n",path.c_str());
+                replacer = new FileReplacer(path.c_str());
+            }
+            if(replacer != NULL){
+                if(replacer->isFileExisting(pathForCheck) == 0){
+                    log_printf("using new path -> %s\n",newPath);
+                    return newPath;
+                }
             }
         }
-    }  
+    }
     return NULL;
 }

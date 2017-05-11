@@ -7,6 +7,8 @@
 #include "utils/logger.h"
 #include "common/retain_vars.h"
 #include "system/exception_handler.h"
+#include "utils/FileReplacer.h"
+#include "utils/StringTools.h"
 
 DECL(int, FSInit, void) {
     if(DEBUG_LOG) log_print("FSInit\n");
@@ -25,7 +27,7 @@ DECL(int, FSInit, void) {
         sprintf(bss.content_mount_base,"%s%s/%016llX/content",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
         sprintf(bss.aoc_mount_base,"%s%s/%016llX/aoc",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
         if(DEBUG_LOG) log_printf("bss.content_mount_base: %s\n",bss.content_mount_base);
-        if(DEBUG_LOG) log_printf("bss.aoc_mount_base: %s\n",bss.aoc_mount_base);    
+        if(DEBUG_LOG) log_printf("bss.aoc_mount_base: %s\n",bss.aoc_mount_base);
     }
     return real_FSInit();
 }
@@ -104,6 +106,17 @@ DECL(int, FSChangeDirAsync, void *pClient, void *pCmd, const char *path, int err
     return res;
 }
 
+DECL(void, __PPCExit, void){
+    delete replacer;
+    replacer = NULL;
+    if((int)bss_ptr != 0x0A000000){
+        free(bss_ptr);
+    }
+    gSDInitDone = 0;
+    log_printf("__PPCExit\n");
+    real___PPCExit();
+}
+
 hooks_magic_t method_hooks_fs[] __attribute__((section(".data"))) = {
     MAKE_MAGIC(FSInit,              LIB_CORE_INIT,  STATIC_FUNCTION),
     MAKE_MAGIC(FSAddClientEx,       LIB_CORE_INIT,  STATIC_FUNCTION),
@@ -112,6 +125,7 @@ hooks_magic_t method_hooks_fs[] __attribute__((section(".data"))) = {
     MAKE_MAGIC(FSOpenFileAsync,     LIB_CORE_INIT,  STATIC_FUNCTION),
     MAKE_MAGIC(FSOpenDirAsync,      LIB_CORE_INIT,  STATIC_FUNCTION),
     MAKE_MAGIC(FSChangeDirAsync,    LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(__PPCExit,           LIB_CORE_INIT,  STATIC_FUNCTION),
 };
 
 u32 method_hooks_size_fs __attribute__((section(".data"))) = sizeof(method_hooks_fs) / sizeof(hooks_magic_t);

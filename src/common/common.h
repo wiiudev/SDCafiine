@@ -11,6 +11,11 @@ extern "C" {
 #define GAME_MOD_FOLDER		        "/sdcafiine"
 #define SD_PATH                     "sd:"
 #define WIIU_PATH                   "/wiiu"
+#define IP_TXT                      "ip.txt"
+
+#define FILELIST_NAME			    "filelist.txt"
+#define DIR_IDENTIFY			    "?"  /* maximum length = 1*/
+#define PARENT_DIR_IDENTIFY         "?.."
 
 /* Macros for libs */
 #define LIB_CORE_INIT           0

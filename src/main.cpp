@@ -1,7 +1,12 @@
+#include <string>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <fat.h>
+#include <iosuhax.h>
+#include <iosuhax_devoptab.h>
+#include <iosuhax_disc_interface.h>
 #include "main.h"
 #include "common/common.h"
 
@@ -12,8 +17,11 @@
 #include "patcher/fs_function_patcher.h"
 #include "utils/function_patcher.h"
 #include "kernel/kernel_functions.h"
+#include "utils/FileReplacer.h"
 #include "utils/logger.h"
 #include "fs/fs_utils.h"
+#include "fs/sd_fat_devoptab.h"
+#include "fs/CFile.hpp"
 #include "common/retain_vars.h"
 
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
@@ -32,9 +40,14 @@ extern "C" int Menu_Main(void)
     InitSysFunctionPointers(); // For SYSLaunchMenu()
     InitFSFunctionPointers();
 
-    SetupKernelCallback();
+    log_init("192.168.0.181");
 
+    log_printf("Mount SD partition\n");
+
+    Init_SD();
     Init_Log();
+
+    SetupKernelCallback();
 
     //Reset everything when were going back to the Mii Maker
     if(!isFirstBoot && isInMiiMakerHBL()){
@@ -83,6 +96,8 @@ void RestorePatches(){
 void deInit(){
     RestorePatches();
     log_deinit();
+    unmount_sd_fat("sd");
+    gSDInitDone = 0;
 }
 
 s32 isInMiiMakerHBL(){
@@ -97,88 +112,46 @@ s32 isInMiiMakerHBL(){
     return 0;
 }
 
+void Init_SD() {
+    //int res = IOSUHAX_Open(NULL); //This is crashing..
+    //if(res < 0){
+        log_printf("IOSUHAX_open failed\n");
+        if(mount_sd_fat("sd") == 0){
+            gSDInitDone = 1;
+        }
+    //}else{
+    //    log_printf("Using IOSUHAX for (some) sd access\n");
+    //    fatInitDefault();
+    //}
+}
+
 void Init_Log() {
-    log_init("192.168.1.50");
     if(!hasReadIP) {
         log_printf("Reading ip from sd card\n");
         hasReadIP = 1;
-        
-        FSStat stats;
-        // get command and client
-        void* pClient = malloc(FS_CLIENT_SIZE);
-        void* pCmd = malloc(FS_CMD_BLOCK_SIZE);
-        char * mountPath = NULL;
 
-        if(!pClient || !pCmd) {
-            // just in case free if not 0
-            if(pClient)
-                free(pClient);
-            if(pCmd)
-                free(pCmd);
+        std::string filepath = std::string(SD_PATH) + WIIU_PATH + "/" + IP_TXT;
+
+        CFile file(filepath, CFile::ReadOnly);
+        if (!file.isOpen()){
+            log_printf("File not found: %s\n",filepath.c_str());
             return;
         }
 
-        FSInit();
-        FSInitCmdBlock(pCmd);
-        FSAddClientEx(pClient, 0, -1);
-        
-        if(MountFS(pClient,pCmd,&mountPath) == 0) {
-            log_printf("Successfully mounted sd card!\n");
-            
-            char path[250];
-            sprintf(path,"%s%s/ip.txt",CAFE_OS_SD_PATH,WIIU_PATH);
-            
-            int status = -1;
-            s32 handle;
-            if((status = FSGetStat(pClient,pCmd,path,&stats,-1)) == 0){
-                log_printf("File found at (%s)\n",path);
-                if(stats.size > 15){
-                    log_printf("filesize is to big!\n");
-                    FSDelClient(pClient);
-                    free(pClient);
-                    free(pCmd);
-                    return;
-                }
-                char * file  = (char *) malloc((sizeof(char)*stats.size)+1);
-                if(!file){
-                    log_printf("Unable to malloc enough space to store contents of file\n");
-                    FSDelClient(pClient);
-                    free(pClient);
-                    free(pCmd);
-                    return;
-                }
-                file[stats.size] = '\0';
-                if((status = FSOpenFile(pClient,pCmd,path,"r",&handle,-1)) == 0){
-                    int total_read = 0;
-                    int ret2 = 0;
-                    while ((ret2 = FSReadFile(pClient,  pCmd, file+total_read, 1, stats.size-total_read, handle, 0, -1)) > 0){
-                        total_read += ret2;
-                    }
-                }else{
-                    log_printf("Unable to open (%s)\n",path);
-                    FSDelClient(pClient);
-                    free(pClient);
-                    free(pCmd);
-                    free(file);
-                    return;
-                }
-                FSCloseFile(pClient,pCmd,handle,-1);
-                UmountFS(pClient,pCmd,mountPath);
-                FSDelClient(pClient);
-                free(pClient);
-                free(pCmd);
-                free(file);
-                
-                
-                strcpy(ipFromSd,file);
-                log_printf("Successfully read ip from sd! ip is: %s\n",ipFromSd);
-            }else{
-                log_printf("%s was not found, unable to load ip from sd\n",path);
-            }
-            
-        } else {
-            log_printf("Unable to mount sd card\n");
+        std::string strBuffer;
+        strBuffer.resize(file.size());
+        file.read((u8 *) &strBuffer[0], strBuffer.size());
+
+        if(strBuffer.length() >= sizeof(ipFromSd)){
+            log_printf("Loading ip from sd failed. String was too long: %s\n",strBuffer.c_str());
+            return;
         }
+        memcpy(ipFromSd,strBuffer.c_str(),strBuffer.length());
+        ipFromSd[strBuffer.length()] = 0;
+
+        log_printf("Successfully read ip from sd! ip is: %s\n",ipFromSd);
+
+        log_init(ipFromSd);
     }
     if(strlen(ipFromSd) > 0) {
         log_init(ipFromSd);
