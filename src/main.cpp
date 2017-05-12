@@ -122,17 +122,17 @@ s32 isInMiiMakerHBL(){
 }
 
 void Init_SD() {
-    //int res = IOSUHAX_Open(NULL); //This is crashing..
-    //if(res < 0){
+    int res = IOSUHAX_Open(NULL); //This is crashing..
+    if(res < 0){
         log_printf("IOSUHAX_open failed\n");
         if(mount_sd_fat("sd") == 0){
             gSDInitDone = 1;
         }
-
-    //}else{
-    //    log_printf("Using IOSUHAX for (some) sd access\n");
-    //    fatInitDefault();
-    //}
+    }else{
+        log_printf("Using IOSUHAX for (some) sd access\n");
+        fatInitDefault();
+        gSDInitDone = 1;
+    }
 }
 
 void Init_Log() {
