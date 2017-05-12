@@ -3,10 +3,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "common/fs_defs.h"
+#include "dynamic_libs/fs_defs.h"
 #include "dynamic_libs/fs_functions.h"
 #include "utils/logger.h"
-
 
 int MountFS(void *pClient, void *pCmd, char **mount_path)
 {
@@ -96,9 +95,9 @@ int LoadFileToMem(const char *filepath, u8 **inbuffer, u32 *size)
 	*inbuffer = buffer;
 
     //! sign is optional input
-    if(size)
+    if(size){
         *size = filesize;
-
+    }
 	return filesize;
 }
 

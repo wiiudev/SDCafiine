@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "common/common.h"
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/socket_functions.h"
 #include "logger.h"
@@ -49,7 +48,7 @@ void log_print(const char *str)
     }
 
     while(log_lock)
-        usleep(1000);
+        os_usleep(1000);
     log_lock = 1;
 
     int len = strlen(str);
