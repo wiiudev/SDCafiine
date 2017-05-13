@@ -106,6 +106,8 @@ void deInit(){
     log_deinit();
     unmount_sd_fat("sd");
     unmount_fake();
+    delete replacer;
+    replacer = NULL;
     gSDInitDone = 0;
 }
 
@@ -122,16 +124,23 @@ s32 isInMiiMakerHBL(){
 }
 
 void Init_SD() {
-    int res = IOSUHAX_Open(NULL); //This is crashing..
+    int res = -1; //IOSUHAX_Open(NULL); //This is not working properly..
     if(res < 0){
-        log_printf("IOSUHAX_open failed\n");
-        if(mount_sd_fat("sd") == 0){
+        //log_printf("IOSUHAX_open failed\n");
+        if((res = mount_sd_fat("sd")) >= 0){
+            log_printf("mount_sd_fat success\n");
             gSDInitDone = 1;
+        }else{
+            log_printf("mount_sd_fat failed %d\n",res);
         }
     }else{
         log_printf("Using IOSUHAX for (some) sd access\n");
-        fatInitDefault();
-        gSDInitDone = 1;
+        if((res = fatInitDefault()) >= 0){
+            log_printf("fatInitDefault success\n");
+            gSDInitDone = 1;
+        }else{
+            log_printf("fatInitDefault failed %d\n",res);
+        }
     }
 }
 

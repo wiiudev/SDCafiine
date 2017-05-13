@@ -10,7 +10,7 @@ FileReplacer::FileReplacer(std::string path){
     int entries = 0;
     dir_all = new Directory("");
     if(read_dir(path, dir_all, &entries)){
-        log_printf("Found %d entries\n",entries);
+        log_printf("Found %d entries:\n",entries);
         dir_all->printFolderRecursive("");
     }
 }
@@ -40,7 +40,11 @@ bool FileReplacer::read_dir(const std::string & path , Directory* dir, int * ent
         if(isDir){
             dirlist.push_back(new std::string(filename));
         }else{
+
             if(entries != NULL){ (*entries)++; }
+            if(*entries % 25 == 0){
+                log_printf("found %d entries so far\n",*entries);
+            }
             dir->addFile(filename);
         }
     }
