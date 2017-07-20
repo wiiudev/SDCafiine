@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <fat.h>
-#include <iosuhax.h>
-#include <iosuhax_devoptab.h>
-#include <iosuhax_disc_interface.h>
 #include "main.h"
 #include "common/common.h"
 
@@ -14,6 +10,7 @@
 #include "dynamic_libs/vpad_functions.h"
 #include "dynamic_libs/socket_functions.h"
 #include "dynamic_libs/sys_functions.h"
+#include "dynamic_libs/proc_ui_functions.h"
 #include "patcher/fs_function_patcher.h"
 #include "utils/function_patcher.h"
 #include "kernel/kernel_functions.h"
@@ -28,8 +25,13 @@
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
 /* Entry point */
+
 extern "C" int Menu_Main(void)
 {
+    if(gAppStatus == 2){
+        //"No, we don't want to patch stuff again.");
+        return EXIT_RELAUNCH_ON_LOAD;
+    }
     //!*******************************************************************
     //!                   Initialize function pointers                   *
     //!*******************************************************************
@@ -39,6 +41,7 @@ extern "C" int Menu_Main(void)
     InitSocketFunctionPointers(); //For logging
 
     InitSysFunctionPointers(); // For SYSLaunchMenu()
+    InitProcUIFunctionPointers(); // For SYSLaunchMenu()
     InitFSFunctionPointers();
 
     log_init("192.168.0.181");
@@ -123,24 +126,14 @@ s32 isInMiiMakerHBL(){
     return 0;
 }
 
+
 void Init_SD() {
-    int res = -1; //IOSUHAX_Open(NULL); //This is not working properly..
-    if(res < 0){
-        //log_printf("IOSUHAX_open failed\n");
-        if((res = mount_sd_fat("sd")) >= 0){
-            log_printf("mount_sd_fat success\n");
-            gSDInitDone = 1;
-        }else{
-            log_printf("mount_sd_fat failed %d\n",res);
-        }
+    int res = 0;
+    if((res = mount_sd_fat("sd")) >= 0){
+        log_printf("mount_sd_fat success\n");
+        gSDInitDone = 1;
     }else{
-        log_printf("Using IOSUHAX for (some) sd access\n");
-        if((res = fatInitDefault()) >= 0){
-            log_printf("fatInitDefault success\n");
-            gSDInitDone = 1;
-        }else{
-            log_printf("fatInitDefault failed %d\n",res);
-        }
+        log_printf("mount_sd_fat failed %d\n",res);
     }
 }
 
