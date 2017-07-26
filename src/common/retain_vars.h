@@ -6,6 +6,7 @@
 #include "dynamic_libs/fs_defs.h"
 extern char ipFromSd[16];
 extern u8 hasReadIP;
+extern u8 gAppStatus;
 extern volatile u8 gSDInitDone;
 extern FileReplacer* replacer;
 extern char selectedMultiModPackFolder[FS_MAX_ENTNAME_SIZE];

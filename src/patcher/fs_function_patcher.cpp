@@ -11,6 +11,7 @@
 #include "utils/StringTools.h"
 
 DECL(int, FSInit, void) {
+    if(gAppStatus == 2) return real_FSInit();
     if(DEBUG_LOG) log_print("FSInit\n");
 
     // setup exceptions, has to be done once per core
@@ -27,6 +28,7 @@ DECL(int, FSInit, void) {
 
 DECL(int, FSAddClientEx, void *pClient, s32 unk_zero_param, s32 errHandling) {
     int res = real_FSAddClientEx(pClient, unk_zero_param, errHandling);
+    if(gAppStatus == 2) return res;
 
     if (res >= 0) {
         client_num_alloc(pClient);
@@ -36,6 +38,7 @@ DECL(int, FSAddClientEx, void *pClient, s32 unk_zero_param, s32 errHandling) {
 }
 
 DECL(int, FSDelClient, void *pClient) {
+    if(gAppStatus == 2) return real_FSDelClient(pClient);
     int client = client_num(pClient);
     if (client < MAX_CLIENT && client >= 0) {
         client_num_free(client);
@@ -44,6 +47,7 @@ DECL(int, FSDelClient, void *pClient) {
 }
 
 DECL(int, FSGetStatAsync, void *pClient, void *pCmd, const char *path, void *stats, int error, FSAsyncParams *asyncParams) {
+    if(gAppStatus == 2) return real_FSGetStatAsync(pClient, pCmd, path, stats, error, asyncParams);
     if(DEBUG_LOG) log_printf("FSGetStatAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
     if(DEBUG_LOG) log_printf("after getNewPath FSGetStatAsync\n");
@@ -59,6 +63,7 @@ DECL(int, FSGetStatAsync, void *pClient, void *pCmd, const char *path, void *sta
 }
 
 DECL(int, FSOpenFileAsync, void *pClient, void *pCmd, const char *path, const char *mode, int *handle, int error, FSAsyncParams *asyncParams) {
+    if(gAppStatus == 2) return real_FSOpenFileAsync(pClient, pCmd, path, mode, handle, error, asyncParams);
     if(DEBUG_LOG) log_printf("FSOpenFileAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
     if(DEBUG_LOG) log_printf("after getNewPath FSOpenFileAsync\n");
@@ -72,6 +77,7 @@ DECL(int, FSOpenFileAsync, void *pClient, void *pCmd, const char *path, const ch
 }
 
 DECL(int, FSOpenDirAsync, void *pClient, void* pCmd, const char *path, int *handle, int error, FSAsyncParams *asyncParams) {
+    if(gAppStatus == 2) return real_FSOpenDirAsync(pClient, pCmd, path, handle, error, asyncParams);
     if(DEBUG_LOG) log_printf("FSOpenDirAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
     if(DEBUG_LOG) log_printf("after getNewPath FSOpenDirAsync\n");
@@ -85,6 +91,7 @@ DECL(int, FSOpenDirAsync, void *pClient, void* pCmd, const char *path, int *hand
 }
 
 DECL(int, FSChangeDirAsync, void *pClient, void *pCmd, const char *path, int error, FSAsyncParams *asyncParams) {
+    if(gAppStatus == 2) return real_FSChangeDirAsync(pClient, pCmd, path, error, asyncParams);
     if(DEBUG_LOG) log_printf("FSChangeDirAsync\n");
     char * newPath = getNewPath(pClient,pCmd,path);
     if(DEBUG_LOG) log_printf("after getNewPath FSChangeDirAsync\n");
@@ -98,30 +105,42 @@ DECL(int, FSChangeDirAsync, void *pClient, void *pCmd, const char *path, int err
 }
 
 DECL(void, __PPCExit, void){
+    log_printf("__PPCExit\n");
     delete replacer;
     replacer = NULL;
     selectedMultiModPackFolder[0] = '/';
     selectedMultiModPackFolder[1] = '\0';
     gSDInitDone = 0;
-    log_printf("__PPCExit\n");
+
     unmount_fake();
     unmount_sd_fat("sd");
     real___PPCExit();
 }
 
+DECL(u32, ProcUIProcessMessages, u32 u){
+    u32 res = real_ProcUIProcessMessages(u);
+    if(res != gAppStatus){
+        log_printf("App status changed from %d to %d \n",gAppStatus,res);
+        gAppStatus = res;
+    }
+
+    return res;
+}
+
 hooks_magic_t method_hooks_fs[] __attribute__((section(".data"))) = {
-    MAKE_MAGIC(FSInit,              LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(FSAddClientEx,       LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(FSDelClient,         LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(FSGetStatAsync,      LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(FSOpenFileAsync,     LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(FSOpenDirAsync,      LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(FSChangeDirAsync,    LIB_CORE_INIT,  STATIC_FUNCTION),
-    MAKE_MAGIC(__PPCExit,           LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSInit,                  LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSAddClientEx,           LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSDelClient,             LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSGetStatAsync,          LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSOpenFileAsync,         LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSOpenDirAsync,          LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(FSChangeDirAsync,        LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(__PPCExit,               LIB_CORE_INIT,  STATIC_FUNCTION),
+    MAKE_MAGIC(ProcUIProcessMessages,   LIB_PROC_UI,    DYNAMIC_FUNCTION),
 };
 
 u32 method_hooks_size_fs __attribute__((section(".data"))) = sizeof(method_hooks_fs) / sizeof(hooks_magic_t);
 
 //! buffer to store our instructions needed for our replacements
-volatile unsigned int method_calls_fs[sizeof(method_hooks_fs) / sizeof(hooks_magic_t) * FUNCTION_PATCHER_METHOD_STORE_SIZE] __attribute__((section(".data")));
+volatile u32 method_calls_fs[sizeof(method_hooks_fs) / sizeof(hooks_magic_t) * FUNCTION_PATCHER_METHOD_STORE_SIZE] __attribute__((section(".data")));
 

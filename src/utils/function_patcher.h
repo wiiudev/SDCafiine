@@ -37,6 +37,7 @@ extern "C" {
 #include "dynamic_libs/vpad_functions.h"
 #include "dynamic_libs/acp_functions.h"
 #include "dynamic_libs/syshid_functions.h"
+#include "dynamic_libs/proc_ui_functions.h"
 
 //Orignal code by Chadderz.
 #define DECL(res, name, ...) \
@@ -46,23 +47,24 @@ extern "C" {
 #define FUNCTION_PATCHER_METHOD_STORE_SIZE  7
 
 typedef struct {
-    const unsigned int replaceAddr;
-    const unsigned int replaceCall;
-    const unsigned int library;
+    const u32 replaceAddr;
+    const u32 replaceCall;
+    const u32 library;
     const char functionName[50];
-    unsigned int realAddr;
-    unsigned int restoreInstruction;
-    unsigned char functionType;
-    unsigned char alreadyPatched;
+    u32 realAddr;
+    u32 restoreInstruction;
+    u8 functionType;
+    u8 alreadyPatched;
 } hooks_magic_t;
 
-void PatchInvidualMethodHooks(hooks_magic_t hook_information[],int hook_information_size, volatile unsigned int dynamic_method_calls[]);
-void RestoreInvidualInstructions(hooks_magic_t hook_information[],int hook_information_size);
-unsigned int GetAddressOfFunction(const char * functionName,unsigned int library);
-int isDynamicFunction(unsigned int physicalAddress);
+void PatchInvidualMethodHooks(hooks_magic_t hook_information[],s32 hook_information_size, volatile u32 dynamic_method_calls[]);
+void RestoreInvidualInstructions(hooks_magic_t hook_information[],s32 hook_information_size);
+u32 GetAddressOfFunction(const char * functionName,u32 library);
+s32 isDynamicFunction(u32 physicalAddress);
 
 //Orignal code by Chadderz.
-#define MAKE_MAGIC(x, lib,functionType) { (unsigned int) my_ ## x, (unsigned int) &real_ ## x, lib, # x,0,0,functionType,0}
+#define MAKE_MAGIC(x, lib,functionType) { (u32) my_ ## x, (u32) &real_ ## x, lib, # x,0,0,functionType,0}
+#define MAKE_MAGIC_NAME(x,y, lib,functionType) { (u32) my_ ## x, (u32) &real_ ## x, lib, # y,0,0,functionType,0}
 
 #ifdef __cplusplus
 }

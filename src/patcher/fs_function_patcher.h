@@ -24,7 +24,7 @@ struct fs_patcher_utils {
 
 extern hooks_magic_t method_hooks_fs[];
 extern u32 method_hooks_size_fs;
-extern volatile unsigned int method_calls_fs[];
+extern volatile u32 method_calls_fs[];
 
 #ifdef __cplusplus
 }
