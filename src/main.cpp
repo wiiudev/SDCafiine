@@ -1,6 +1,7 @@
 #include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <fat.h>
@@ -8,6 +9,7 @@
 #include <iosuhax_devoptab.h>
 #include <iosuhax_disc_interface.h>
 #include "main.h"
+#include "modpackSelector.h"
 #include "common/common.h"
 
 #include "dynamic_libs/os_functions.h"
@@ -22,6 +24,7 @@
 #include "fs/fs_utils.h"
 #include "fs/sd_fat_devoptab.h"
 #include "fs/CFile.hpp"
+#include "fs/DirList.h"
 #include "common/retain_vars.h"
 #include "system/exception_handler.h"
 
@@ -40,8 +43,12 @@ extern "C" int Menu_Main(void)
 
     InitSysFunctionPointers(); // For SYSLaunchMenu()
     InitFSFunctionPointers();
+    InitVPadFunctionPointers();
 
-    log_init("192.168.0.181");
+    //we dont need to use a hardcoded ip if we read one from the sd card..
+    if(strlen(ipFromSd) <= 0) {
+        log_init("192.168.1.15");
+    }
 
     setup_os_exceptions();
 
@@ -70,6 +77,8 @@ extern "C" int Menu_Main(void)
     //!*******************************************************************
     log_print("Patching functions\n");
     ApplyPatches();
+
+    HandleMultiModPacks();
 
     if(!isInMiiMakerHBL()){ //Starting the application
         return EXIT_RELAUNCH_ON_LOAD;
@@ -176,4 +185,3 @@ void Init_Log() {
         log_init(ipFromSd);
     }
 }
-

@@ -138,7 +138,7 @@ char * getNewPath(void *pClient, void *pCmd, const char *path){
 
         if(getClientAndInitSD(pClient,pCmd) != -1){
             if(replacer == NULL){
-                std::string path  = strfmt("%s%s/%016llX/",SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
+                std::string path = strfmt("%s%s/%016llX%s/",SD_PATH,GAME_MOD_FOLDER,OSGetTitleID(),selectedMultiModPackFolder);
                 log_printf("Creating new file replacer %s\n",path.c_str());
                 replacer = new FileReplacer(path.c_str());
             }

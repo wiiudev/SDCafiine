@@ -16,8 +16,9 @@ DECL(int, FSInit, void) {
     // setup exceptions, has to be done once per core
     setup_os_exceptions();
 
-    sprintf(fspatchervars.content_mount_base,"%s%s/%016llX/content",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
-    sprintf(fspatchervars.aoc_mount_base,"%s%s/%016llX/aoc",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID());
+    sprintf(fspatchervars.content_mount_base,"%s%s/%016llX%s/content",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID(),selectedMultiModPackFolder);
+    sprintf(fspatchervars.aoc_mount_base,"%s%s/%016llX%s/aoc",CAFE_OS_SD_PATH,GAME_MOD_FOLDER,OSGetTitleID(),selectedMultiModPackFolder);
+    
     if(DEBUG_LOG) log_printf("bss.content_mount_base: %s\n",fspatchervars.content_mount_base);
     if(DEBUG_LOG) log_printf("bss.aoc_mount_base: %s\n",fspatchervars.aoc_mount_base);
 
@@ -99,7 +100,8 @@ DECL(int, FSChangeDirAsync, void *pClient, void *pCmd, const char *path, int err
 DECL(void, __PPCExit, void){
     delete replacer;
     replacer = NULL;
-
+    selectedMultiModPackFolder[0] = '/';
+    selectedMultiModPackFolder[1] = '\0';
     gSDInitDone = 0;
     log_printf("__PPCExit\n");
     unmount_fake();

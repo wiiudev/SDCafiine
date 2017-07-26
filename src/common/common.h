@@ -12,6 +12,7 @@ extern "C" {
 #define SD_PATH                     "sd:"
 #define WIIU_PATH                   "/wiiu"
 #define IP_TXT                      "ip.txt"
+#define VERSION						"1.2"
 
 #define FILELIST_NAME			    "filelist.txt"
 #define DIR_IDENTIFY			    "?"  /* maximum length = 1*/
