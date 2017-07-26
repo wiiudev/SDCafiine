@@ -108,8 +108,7 @@ DECL(void, __PPCExit, void){
     log_printf("__PPCExit\n");
     delete replacer;
     replacer = NULL;
-    selectedMultiModPackFolder[0] = '/';
-    selectedMultiModPackFolder[1] = '\0';
+    sprintf(selectedMultiModPackFolder, "/");
     gSDInitDone = 0;
 
     unmount_fake();

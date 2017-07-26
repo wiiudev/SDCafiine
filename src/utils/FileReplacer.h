@@ -18,7 +18,9 @@ class FileReplacer{
 	  bool isFileExisting(std::string param);
 	  int getSize();
 	private:
-	  Directory * dir_all;
+    Directory * dir_all;
+    Directory * dir_content;
+    Directory * dir_aoc;
 
       //FileReplacer(std::string path,std::string content,std::string filename,void * pClient,void * pCmd);
       //std::string getFileListAsString();

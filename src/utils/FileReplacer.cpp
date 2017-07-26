@@ -7,10 +7,21 @@
 #include "fs/fs_utils.c"
 
 FileReplacer::FileReplacer(std::string path){
-    int entries = 0;
+    int entries_content = 0;
+    int entries_aoc = 0;
+
     dir_all = new Directory("");
-    if(read_dir(path, dir_all, &entries)){
-        log_printf("Found %d entries:\n",entries);
+    dir_content = new Directory("content");
+    dir_aoc = new Directory("aoc");
+
+    dir_all->addFolder(dir_content);
+    dir_all->addFolder(dir_aoc);
+
+    read_dir(path + "content/", dir_content, &entries_content);
+    read_dir(path + "aoc/", dir_aoc, &entries_aoc);
+
+    if(entries_content + entries_aoc > 1) {
+        log_printf("Found %d entries:\n",entries_content + entries_aoc);
         dir_all->printFolderRecursive("");
     }
 }
