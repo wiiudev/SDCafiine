@@ -211,10 +211,10 @@ void HandleMultiModPacks() {
         free(screenbuffers);
     } else {
         //handle single modpack selection
-        if(hasDefault) {
-        	sprintf(selectedMultiModPackFolder, "/");
-        } else {
+        if(modpackTotalCount == 1 && !hasDefault) {
         	sprintf(selectedMultiModPackFolder, "/%s", modpackList[0][0]);
+        } else {
+        	sprintf(selectedMultiModPackFolder, "/");
         }
     } 
 }
