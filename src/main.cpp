@@ -7,7 +7,10 @@
 #include "main.h"
 #include "modpackSelector.h"
 #include "common/common.h"
-
+#include <fat.h>
+#include <iosuhax.h>
+#include <iosuhax_devoptab.h>
+#include <iosuhax_disc_interface.h>
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/vpad_functions.h"
 #include "dynamic_libs/socket_functions.h"
@@ -24,6 +27,7 @@
 #include "fs/DirList.h"
 #include "common/retain_vars.h"
 #include "system/exception_handler.h"
+#include "utils/mcpHook.h"
 
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
@@ -54,9 +58,6 @@ extern "C" int Menu_Main(void)
     }
 
     setup_os_exceptions();
-
-    log_printf("Mount fake devo device\n");
-    mount_fake();
 
     log_printf("Mount SD partition\n");
     Init_SD();
@@ -116,8 +117,19 @@ void RestorePatches(){
 void deInit(){
     RestorePatches();
     log_deinit();
-    unmount_sd_fat("sd");
-    unmount_fake();
+    if(gUsingLibIOSUHAX != 0){
+        fatUnmount("sd");
+        if(gUsingLibIOSUHAX == 1){
+            log_printf("close IOSUHAX_Close\n");
+            IOSUHAX_Close();
+        }else{
+            log_printf("close MCPHookClose\n");
+            MCPHookClose();
+        }
+    }else{
+        unmount_sd_fat("sd");
+        unmount_fake();
+    }
     delete replacer;
     replacer = NULL;
     gSDInitDone = 0;
@@ -135,16 +147,39 @@ s32 isInMiiMakerHBL(){
     return 0;
 }
 
-
 void Init_SD() {
-    int res = 0;
-    if((res = mount_sd_fat("sd")) >= 0){
-        log_printf("mount_sd_fat success\n");
-        gSDInitDone = 1;
+    int res = IOSUHAX_Open(NULL); //This is not working properly..
+    if(res < 0){
+        res = MCPHookOpen();
+        gUsingLibIOSUHAX = 2;
+    }
+    if(res < 0){
+        gUsingLibIOSUHAX = 0;
+        log_printf("IOSUHAX_open failed\n");
+        mount_fake();
+        if((res = mount_sd_fat("sd")) >= 0){
+            log_printf("mount_sd_fat success\n");
+            gSDInitDone = 1;
+        }else{
+            log_printf("mount_sd_fat failed %d\n",res);
+        }
     }else{
-        log_printf("mount_sd_fat failed %d\n",res);
+        if(gUsingLibIOSUHAX != 2){
+            log_printf("Using IOSUHAX for (some) sd access\n");
+            gUsingLibIOSUHAX = 1;
+        }else{
+            log_printf("Using IOSUHAX (MCPHOOK) for (some) sd access\n");
+        }
+
+        if((res = fatInitDefault()) >= 0){
+            log_printf("fatInitDefault success\n");
+            gSDInitDone = 1;
+        }else{
+            log_printf("fatInitDefault failed %d\n",res);
+        }
     }
 }
+
 
 void Init_Log() {
     if(!hasReadIP) {
