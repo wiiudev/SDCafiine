@@ -3,12 +3,16 @@
 #include <string.h>
 #include "fs_function_patcher.h"
 #include "fs_function_utils.h"
-
+#include <fat.h>
+#include <iosuhax.h>
+#include <iosuhax_devoptab.h>
+#include <iosuhax_disc_interface.h>
 #include "utils/logger.h"
 #include "common/retain_vars.h"
 #include "system/exception_handler.h"
 #include "utils/FileReplacer.h"
 #include "utils/StringTools.h"
+#include "utils/mcpHook.h"
 
 DECL(int, FSInit, void) {
     if(gAppStatus == 2) return real_FSInit();
@@ -111,8 +115,20 @@ DECL(void, __PPCExit, void){
     sprintf(selectedMultiModPackFolder, "/");
     gSDInitDone = 0;
 
-    unmount_fake();
-    unmount_sd_fat("sd");
+    if(gUsingLibIOSUHAX != 0){
+        fatUnmount("sd");
+         if(gUsingLibIOSUHAX == 1){
+            log_printf("close IOSUHAX_Close\n");
+            IOSUHAX_Close();
+        }else{
+            log_printf("close MCPHookClose\n");
+            MCPHookClose();
+        }
+    }else{
+        unmount_sd_fat("sd");
+        unmount_fake();
+    }
+
     real___PPCExit();
 }
 

@@ -39,6 +39,8 @@ int FileReplacer::getSize(){
 bool FileReplacer::read_dir(const std::string & path , Directory* dir, int * entries){
 	std::vector<std::string *> dirlist;
 
+
+
     struct dirent *dirent = NULL;
 	DIR *dir_ = opendir(path.c_str());
 	if (dir_ == NULL){
@@ -47,6 +49,11 @@ bool FileReplacer::read_dir(const std::string & path , Directory* dir, int * ent
 	while ((dirent = readdir(dir_)) != 0){
 		bool isDir = dirent->d_type & DT_DIR;
 		const char *filename = dirent->d_name;
+
+		if(strcmp(filename,".") == 0 ||
+            strcmp(filename,"..") == 0){
+            continue;
+        }
 
         if(isDir){
             dirlist.push_back(new std::string(filename));
