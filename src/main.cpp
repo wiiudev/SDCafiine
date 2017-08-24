@@ -111,14 +111,8 @@ void RestorePatches(){
 
 void deInit(){
     RestorePatches();
-<<<<<<< HEAD
-<<<<<<< HEAD
     unmount_sd_fat("sd");
     unmount_fake();
-=======
-=======
->>>>>>> 358e54a4c1d3c609394a2207e9c380431f3c10e3
-    log_deinit();
     if(gUsingLibIOSUHAX != 0){
         fatUnmount("sd");
         if(gUsingLibIOSUHAX == 1){
@@ -132,10 +126,6 @@ void deInit(){
         unmount_sd_fat("sd");
         unmount_fake();
     }
-<<<<<<< HEAD
->>>>>>> 358e54a4c1d3c609394a2207e9c380431f3c10e3
-=======
->>>>>>> 358e54a4c1d3c609394a2207e9c380431f3c10e3
     delete replacer;
     replacer = NULL;
     gSDInitDone = 0;
@@ -184,43 +174,4 @@ void Init_SD() {
             log_printf("fatInitDefault failed %d\n",res);
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
-
-
-
-void Init_Log() {
-    if(!hasReadIP) {
-        log_printf("Reading ip from sd card\n");
-        hasReadIP = 1;
-
-        std::string filepath = std::string(SD_PATH) + WIIU_PATH + "/" + IP_TXT;
-
-        CFile file(filepath, CFile::ReadOnly);
-        if (!file.isOpen()){
-            log_printf("File not found: %s\n",filepath.c_str());
-            return;
-        }
-
-        std::string strBuffer;
-        strBuffer.resize(file.size());
-        file.read((u8 *) &strBuffer[0], strBuffer.size());
-
-        if(strBuffer.length() >= sizeof(ipFromSd)){
-            log_printf("Loading ip from sd failed. String was too long: %s\n",strBuffer.c_str());
-            return;
-        }
-        memcpy(ipFromSd,strBuffer.c_str(),strBuffer.length());
-        ipFromSd[strBuffer.length()] = 0;
-
-        log_printf("Successfully read ip from sd! ip is: %s\n",ipFromSd);
-
-        log_init(ipFromSd);
-    }
-    if(strlen(ipFromSd) > 0) {
-        log_init(ipFromSd);
-    }
-}
->>>>>>> 358e54a4c1d3c609394a2207e9c380431f3c10e3
