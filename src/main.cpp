@@ -112,9 +112,12 @@ void RestorePatches(){
 void deInit(){
     RestorePatches();
 <<<<<<< HEAD
+<<<<<<< HEAD
     unmount_sd_fat("sd");
     unmount_fake();
 =======
+=======
+>>>>>>> 358e54a4c1d3c609394a2207e9c380431f3c10e3
     log_deinit();
     if(gUsingLibIOSUHAX != 0){
         fatUnmount("sd");
@@ -129,6 +132,9 @@ void deInit(){
         unmount_sd_fat("sd");
         unmount_fake();
     }
+<<<<<<< HEAD
+>>>>>>> 358e54a4c1d3c609394a2207e9c380431f3c10e3
+=======
 >>>>>>> 358e54a4c1d3c609394a2207e9c380431f3c10e3
     delete replacer;
     replacer = NULL;
@@ -182,6 +188,7 @@ void Init_SD() {
 }
 =======
 }
+
 
 
 void Init_Log() {
