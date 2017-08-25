@@ -6,12 +6,8 @@
 extern "C" {
 #endif
 
-int client_num_alloc(void *pClient);
-void client_num_free(int client);
-int client_num(void *pClient);
-int getClientAndInitSD(void *pClient, void *pCmd);
 int is_gamefile(const char *path);
-char * getNewPath(void *pClient, void *pCmd, const char *path);
+char * getNewPath(const char *path);
 
 #ifdef __cplusplus
 }

@@ -57,9 +57,16 @@
 		<Unit filename="build/kernel_hooks.d" />
 		<Unit filename="build/logger.d" />
 		<Unit filename="build/main.d" />
+		<Unit filename="build/mcpHook.d" />
 		<Unit filename="build/memory.d" />
+		<Unit filename="build/nfp_functions.d" />
+		<Unit filename="build/nn_act_functions.d" />
+		<Unit filename="build/nn_nim_functions.d" />
+		<Unit filename="build/nn_save_functions.d" />
+		<Unit filename="build/ntag_functions.d" />
 		<Unit filename="build/os_functions.d" />
 		<Unit filename="build/padscore_functions.d" />
+		<Unit filename="build/proc_ui_functions.d" />
 		<Unit filename="build/retain_vars.d" />
 		<Unit filename="build/sd_fat_devoptab.d" />
 		<Unit filename="build/socket_functions.d" />
@@ -105,6 +112,26 @@
 		</Unit>
 		<Unit filename="src/dynamic_libs/gx2_functions.h" />
 		<Unit filename="src/dynamic_libs/gx2_types.h" />
+		<Unit filename="src/dynamic_libs/nfp_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dynamic_libs/nfp_functions.h" />
+		<Unit filename="src/dynamic_libs/nn_act_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dynamic_libs/nn_act_functions.h" />
+		<Unit filename="src/dynamic_libs/nn_nim_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dynamic_libs/nn_nim_functions.h" />
+		<Unit filename="src/dynamic_libs/nn_save_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dynamic_libs/nn_save_functions.h" />
+		<Unit filename="src/dynamic_libs/ntag_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dynamic_libs/ntag_functions.h" />
 		<Unit filename="src/dynamic_libs/os_functions.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -114,6 +141,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/dynamic_libs/padscore_functions.h" />
+		<Unit filename="src/dynamic_libs/proc_ui_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/dynamic_libs/proc_ui_functions.h" />
 		<Unit filename="src/dynamic_libs/socket_functions.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -237,6 +268,7 @@
 		<Unit filename="src/patcher/fs_function_patcher.h" />
 		<Unit filename="src/patcher/fs_function_utils.cpp" />
 		<Unit filename="src/patcher/fs_function_utils.h" />
+		<Unit filename="src/system/OSThread.h" />
 		<Unit filename="src/system/dynamic.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -263,6 +295,11 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/utils/logger.h" />
+		<Unit filename="src/utils/mcpHook.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/utils/mcpHook.cpp" />
+		<Unit filename="src/utils/mcpHook.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

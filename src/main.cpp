@@ -19,7 +19,7 @@
 #include "patcher/fs_function_patcher.h"
 #include "utils/function_patcher.h"
 #include "kernel/kernel_functions.h"
-#include "utils/FileReplacer.h"
+#include "utils/FileReplacerUtils.h"
 #include "utils/logger.h"
 #include "fs/fs_utils.h"
 #include "fs/sd_fat_devoptab.h"
@@ -27,12 +27,15 @@
 #include "fs/DirList.h"
 #include "common/retain_vars.h"
 #include "system/exception_handler.h"
+#include "system/OSThread.h"
 #include "utils/mcpHook.h"
+
+#include <sys/types.h>
+#include <dirent.h>
 
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
 /* Entry point */
-
 extern "C" int Menu_Main(void)
 {
     if(gAppStatus == 2){
@@ -56,12 +59,12 @@ extern "C" int Menu_Main(void)
 
     setup_os_exceptions();
 
+    gSDInitDone = 0;
+
     log_printf("Mount SD partition\n");
     Init_SD();
 
     SetupKernelCallback();
-
-    memset(&fspatchervars,0,sizeof(fspatchervars));
 
     //Reset everything when were going back to the Mii Maker
     if(!isFirstBoot && isInMiiMakerHBL()){
@@ -71,13 +74,13 @@ extern "C" int Menu_Main(void)
         return EXIT_SUCCESS;
     }
 
+    HandleMultiModPacks();
+
     //!*******************************************************************
     //!                        Patching functions                        *
     //!*******************************************************************
     log_print("Patching functions\n");
     ApplyPatches();
-
-    HandleMultiModPacks();
 
     if(!isInMiiMakerHBL()){ //Starting the application
         return EXIT_RELAUNCH_ON_LOAD;
@@ -111,10 +114,10 @@ void RestorePatches(){
 
 void deInit(){
     RestorePatches();
-    unmount_sd_fat("sd");
-    unmount_fake();
+    log_deinit();
     if(gUsingLibIOSUHAX != 0){
         fatUnmount("sd");
+        fatUnmount("usb");
         if(gUsingLibIOSUHAX == 1){
             log_printf("close IOSUHAX_Close\n");
             IOSUHAX_Close();
@@ -124,10 +127,10 @@ void deInit(){
         }
     }else{
         unmount_sd_fat("sd");
-        unmount_fake();
     }
-    delete replacer;
-    replacer = NULL;
+    unmount_fake();
+    deleteDevTabsNames();
+    FileReplacerUtils::destroyInstance();
     gSDInitDone = 0;
 }
 
@@ -144,15 +147,17 @@ s32 isInMiiMakerHBL(){
 }
 
 void Init_SD() {
+    log_printf("Mount fake\n");
+    mount_fake();
     int res = IOSUHAX_Open(NULL); //This is not working properly..
-    if(res < 0){
+
+    /*if(res < 0){ This is the haxchi work around. But it breaks disc reading. so well.. mocha 1, haxchi 0.
         res = MCPHookOpen();
         gUsingLibIOSUHAX = 2;
-    }
+    }*/
     if(res < 0){
         gUsingLibIOSUHAX = 0;
         log_printf("IOSUHAX_open failed\n");
-        mount_fake();
         if((res = mount_sd_fat("sd")) >= 0){
             log_printf("mount_sd_fat success\n");
             gSDInitDone = 1;

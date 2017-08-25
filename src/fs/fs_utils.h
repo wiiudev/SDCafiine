@@ -16,6 +16,10 @@ int LoadFileToMem(const char *filepath, u8 **inbuffer, u32 *size);
 int CreateSubfolder(const char * fullpath);
 int CheckFile(const char * filepath);
 
+int is_gamefile(const char *path);
+char * getPathWithNewBase(const char * inPath, const char * newBase);
+char * getRelativePath(const char *path);
+
 #ifdef __cplusplus
 }
 #endif

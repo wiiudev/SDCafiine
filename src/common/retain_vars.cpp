@@ -3,7 +3,10 @@
 u8 gUsingLibIOSUHAX __attribute__((section(".data"))) = 0;
 u8 gAppStatus __attribute__((section(".data"))) = 0;
 volatile u8 gSDInitDone __attribute__((section(".data"))) = 0;
-FileReplacer * replacer __attribute__((section(".data"))) = NULL;
-char selectedMultiModPackFolder[FS_MAX_ENTNAME_SIZE] __attribute__((section(".data"))) = "/\0";
 
-struct fs_patcher_utils fspatchervars __attribute__((section(".data")));
+char gModFolder[FS_MAX_ENTNAME_SIZE] __attribute__((section(".data")));
+
+FSAsyncResult gAsyncResultCache[ASYNC_RESULT_CACHE_SIZE] __attribute__((section(".data")));
+u8 gAsyncResultCacheLock __attribute__((section(".data"))) = 0;
+u8 gAsyncResultCacheCur __attribute__((section(".data"))) = 0;
+

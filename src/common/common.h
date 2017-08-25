@@ -10,9 +10,22 @@ extern "C" {
 #define CAFE_OS_SD_PATH             "/vol/external01"
 #define GAME_MOD_FOLDER		        "/sdcafiine"
 #define SD_PATH                     "sd:"
+#define USB_PATH                    "usb:"
+#define DEFAULT_NAME_PACKAGE        "DEFAULT"
+#define NAME_PREFIX_SD              "sd: "
+#define NAME_PREFIX_USB             "usb:"
 #define WIIU_PATH                   "/wiiu"
 #define IP_TXT                      "ip.txt"
-#define VERSION						"1.3"
+#define VERSION						"1.4 (experimental)"
+
+#define CONTENT_FOLDER				"content"
+#define AOC_FOLDER				    "aoc"
+
+#define GAME_PATH_TYPE_CONTENT      1
+#define GAME_PATH_TYPE_AOC          2
+
+#define USE_OS_FS_FUNCTION          -1337
+
 
 #define FILELIST_NAME			    "filelist.txt"
 #define DIR_IDENTIFY			    "?"  /* maximum length = 1*/

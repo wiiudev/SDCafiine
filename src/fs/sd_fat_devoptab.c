@@ -32,6 +32,7 @@
 #include "dynamic_libs/fs_functions.h"
 #include "dynamic_libs/os_functions.h"
 #include "fs_utils.h"
+#include "utils/logger.h"
 
 #define FS_ALIGNMENT            0x40
 #define FS_ALIGN(x)             (((x) + FS_ALIGNMENT - 1) & ~(FS_ALIGNMENT - 1))
@@ -932,6 +933,29 @@ static int sd_fat_add_device (const char *name, const char *mount_path, void *pC
     // If we reach here then there are no free slots in the devoptab table for this device
     errno = EADDRNOTAVAIL;
     return -1;
+}
+
+/*
+Because of some weird reason unmounting doesn't work properly.
+This fix if mainly when a usb drive is connected.
+It resets the devoptab_list, otherwise mounting again would throw an exception (in strlen).
+No memory is free'd here. Maybe a problem?!?!?
+*/
+
+void deleteDevTabsNames(){
+    const devoptab_t *devoptab = NULL;
+    u32 test = devoptab_list[STD_MAX-1];
+    for (int i = 3; i < STD_MAX; i++) {
+        devoptab = devoptab_list[i];
+
+        if (devoptab) {
+            //log_printf("check devotab %d %08X\n",i,devoptab);
+            if(devoptab != test){
+                devoptab_list[i] = test;
+                //log_printf("Removed devotab %d %08X %08X %08X\n",i,devoptab,devoptab->name,devoptab->deviceData);
+            }
+        }
+    }
 }
 
 static int sd_fat_remove_device (const char *path, void **pClient, void **pCmd, char **mountPath)

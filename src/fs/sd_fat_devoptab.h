@@ -28,6 +28,7 @@
 extern "C" {
 #endif
 
+void deleteDevTabsNames();
 int mount_sd_fat(const char *path);
 int unmount_sd_fat(const char *path);
 int mount_fake();
