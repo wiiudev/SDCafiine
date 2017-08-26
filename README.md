@@ -4,7 +4,7 @@
 This version is very experimental and only for testing.!!!! May or may not work.
 
 ## Usage Instructions
-- Load mocha for full support, otherwise only SSBU is working. HAXCHI/CBHC is NOT supported.  
+- Load mocha for full support, otherwise only SSBU is working. The built-in CFW of HAXCHI/CBHC is NOT supported.
 - Load the elf with the [homebrew launcher](https://github.com/dimok789/homebrew_launcher)  
 
 To use SDCafiine with any game or load mods from USB, you need to load mocha first.  
