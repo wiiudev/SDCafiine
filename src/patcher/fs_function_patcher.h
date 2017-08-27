@@ -8,19 +8,7 @@ extern "C" {
 #include "utils/function_patcher.h"
 
 /* Forward declarations */
-#define DEBUG_LOG 0
-
-/*
-typedef struct param{
-    FSClient *pClient;
-    FSCmdBlock *pCmd;
-    const char *path;
-    const char *newPath;
-    const char *mode;
-    int *handle;
-    int error;
-    FSAsyncParams *asyncParams;
-} AsyncParam;*/
+#define DEBUG_LOG 1
 
 extern hooks_magic_t method_hooks_fs[];
 extern u32 method_hooks_size_fs;

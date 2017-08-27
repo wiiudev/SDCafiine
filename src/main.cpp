@@ -61,6 +61,8 @@ extern "C" int Menu_Main(void)
 
     gSDInitDone = 0;
 
+    FileReplacerUtils::getInstance()->StartAsyncThread();
+
     log_printf("Mount SD partition\n");
     Init_SD();
 
@@ -87,6 +89,7 @@ extern "C" int Menu_Main(void)
     }
 
     if(isFirstBoot){ // First boot back to SysMenu
+        log_printf("Loading the System Menu\n");
         isFirstBoot = 0;
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
@@ -114,6 +117,8 @@ void RestorePatches(){
 
 void deInit(){
     RestorePatches();
+    FileReplacerUtils::getInstance()->StopAsyncThread();
+    FileReplacerUtils::destroyInstance();
     log_deinit();
     if(gUsingLibIOSUHAX != 0){
         fatUnmount("sd");
@@ -130,7 +135,7 @@ void deInit(){
     }
     unmount_fake();
     deleteDevTabsNames();
-    FileReplacerUtils::destroyInstance();
+
     gSDInitDone = 0;
 }
 

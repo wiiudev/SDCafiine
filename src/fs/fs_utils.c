@@ -204,7 +204,7 @@ int is_gamefile(const char *path) {
 }
 char * getPathWithNewBase(const char * inPath, const char * newBase){
     if(inPath == NULL || newBase == NULL || !(strlen(newBase) > 0)) return NULL;
-    const char * relativePath = getRelativePath(inPath);
+    char * relativePath = getRelativePath(inPath);
     if(relativePath == NULL) return NULL;
 
     char * result = NULL;

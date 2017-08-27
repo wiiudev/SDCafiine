@@ -1,8 +1,34 @@
-#include <vector>
-#include <algorithm>
+
 
 #ifndef __FILE_REPLACER_UTILS_H_
 #define __FILE_REPLACER_UTILS_H_
+
+#include <vector>
+#include <algorithm>
+
+#include "common/retain_vars.h"
+#include "system/OSThread.h"
+#include "dynamic_libs/fs_defs.h"
+
+typedef struct CustomAsyncParam_{
+    FSClient *pClient;
+    FSCmdBlock *pCmd;
+    const char *path;
+    const char *newPath;
+    const char *mode;
+    FSStat * stats;
+    void * buffer;
+    int handle;
+    int size;
+    int count;
+    int pos;
+    int flag;
+    int *handlePtr;
+    int *posPtr;
+    int error;
+    FSAsyncParams *asyncParams;
+    void* realFunction;
+} CustomAsyncParam;
 
 class FileReplacerUtils{
     public:
@@ -16,6 +42,10 @@ class FileReplacerUtils{
 
         static void destroyInstance() {
             if(instance){
+                while(instance->serverHasStopped){
+                    os_usleep(1000);
+                }
+                os_usleep(10000);
                 delete instance;
                 instance = NULL;
             }
@@ -31,6 +61,19 @@ class FileReplacerUtils{
 
         static bool hasHandle(int handle){
             return getInstance()->hasHandleInternal(handle);
+        }
+
+        static void sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncParams* asyncParams,int status);
+
+        void StartAsyncThread();
+
+        void StopAsyncThread(){
+            log_printf("StopAsyncThread\n");
+            OSMessage message;
+            message.message = 0xDEADBEEF;
+            log_printf("StopAsyncThread. Sending message\n");
+            OSSendMessage(&gFSQueue,&message,OS_MESSAGE_BLOCK);
+            log_printf("StopAsyncThread. Sending message\n");
         }
 
 	private:
@@ -53,8 +96,17 @@ class FileReplacerUtils{
             }
         }
 
+        static void DoAsyncThread(CThread *thread, void *arg);
+
+        static FSAsyncResult * getNewAsyncParamPointer();
+
+        void DoAsyncThreadInternal();
+
+        CThread *pThread;
+
+        volatile int serverHasStopped = 1;
+
 	    std::vector<int> handles;
         static FileReplacerUtils * instance;
-
 };
 #endif // __FILE_REPLACER_UTILS_H_
