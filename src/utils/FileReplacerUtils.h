@@ -71,9 +71,7 @@ class FileReplacerUtils{
             log_printf("StopAsyncThread\n");
             OSMessage message;
             message.message = 0xDEADBEEF;
-            log_printf("StopAsyncThread. Sending message\n");
-            OSSendMessage(&gFSQueue,&message,OS_MESSAGE_BLOCK);
-            log_printf("StopAsyncThread. Sending message\n");
+            while(!OSSendMessage(&gFSQueue,&message,OS_MESSAGE_NOBLOCK));
         }
 
 	private:

@@ -32,16 +32,14 @@ void FileReplacerUtils::DoAsyncThreadInternal(){
         }
         if(DEBUG_LOG){log_printf("DoAsyncThreadInternal()[LINE %d]: Received message %08X\n",__LINE__,message.message);}
         if(message.message == 0xDEADBEEF){
-            //log_printf("DoAsyncThreadInternal()[LINE %d]: We should stop the server\n",__LINE__);
+            log_printf("DoAsyncThreadInternal()[LINE %d]: We should stop the server\n",__LINE__);
             break;
-        }else{
-            //log_printf("DoAsyncThreadInternal()[LINE %d]: Other message\n",__LINE__);
         }
 
         callback = (void(*)(CustomAsyncParam *))message.message;
         CustomAsyncParam * param = (CustomAsyncParam *)message.data0;
 
-        log_printf("DoAsyncThreadInternal()[LINE %d]: Calling callback at %08X, with %08X\n",__LINE__,callback,param);
+        if(DEBUG_LOG){log_printf("DoAsyncThreadInternal()[LINE %d]: Calling callback at %08X, with %08X\n",__LINE__,callback,param);}
         callback(param);
         free(param);
     }
@@ -65,12 +63,9 @@ FSAsyncResult * FileReplacerUtils::getNewAsyncParamPointer(){
 }
 
 void FileReplacerUtils::sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncParams* asyncParams,int status){
-    log_printf("sendAsyncCommand FSClient: %08X FSCmdBlock: %08X\n",client,cmd);
     if(asyncParams != NULL){
         if(asyncParams->userCallback != NULL){ //Using the userCallback
-            if(DEBUG_LOG){log_printf("asyncParams->userCallback %08X\n",asyncParams);}
             asyncParams->userCallback(client,cmd,status,asyncParams->userContext);
-            if(DEBUG_LOG){log_printf("asyncParams->userCallback %08X ended\n",asyncParams);}
             return;
         }else{
             FSAsyncResult * result = FileReplacerUtils::getNewAsyncParamPointer();

@@ -38,8 +38,9 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="build/CFile.d" />
+		<Unit filename="build/DirList.d" />
 		<Unit filename="build/Directory.d" />
-		<Unit filename="build/FileReplacer.d" />
+		<Unit filename="build/FileReplacerUtils.d" />
 		<Unit filename="build/StringTools.d" />
 		<Unit filename="build/acp_functions.d" />
 		<Unit filename="build/aoc_functions.d" />
@@ -55,10 +56,12 @@
 		<Unit filename="build/gx2_functions.d" />
 		<Unit filename="build/kernel_functions.d" />
 		<Unit filename="build/kernel_hooks.d" />
+		<Unit filename="build/libfat_wrapper.d" />
 		<Unit filename="build/logger.d" />
 		<Unit filename="build/main.d" />
 		<Unit filename="build/mcpHook.d" />
 		<Unit filename="build/memory.d" />
+		<Unit filename="build/modpackSelector.d" />
 		<Unit filename="build/nfp_functions.d" />
 		<Unit filename="build/nn_act_functions.d" />
 		<Unit filename="build/nn_nim_functions.d" />
@@ -70,7 +73,6 @@
 		<Unit filename="build/retain_vars.d" />
 		<Unit filename="build/sd_fat_devoptab.d" />
 		<Unit filename="build/socket_functions.d" />
-		<Unit filename="build/stubs_elf.d" />
 		<Unit filename="build/sys_functions.d" />
 		<Unit filename="build/syscalls.d" />
 		<Unit filename="build/syscalls_asm.d" />
@@ -80,9 +82,6 @@
 		<Unit filename="src/common/kernel_defs.h" />
 		<Unit filename="src/common/loader_defs.h" />
 		<Unit filename="src/common/os_defs.h" />
-		<Unit filename="src/common/retain_vars.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="src/common/retain_vars.cpp" />
 		<Unit filename="src/common/retain_vars.h" />
 		<Unit filename="src/common/types.h" />
@@ -166,92 +165,18 @@
 		</Unit>
 		<Unit filename="src/fs/CFile.cpp" />
 		<Unit filename="src/fs/CFile.hpp" />
+		<Unit filename="src/fs/DirList.cpp" />
+		<Unit filename="src/fs/DirList.h" />
 		<Unit filename="src/fs/fs_utils.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/fs/fs_utils.h" />
+		<Unit filename="src/fs/libfat_wrapper.cpp" />
+		<Unit filename="src/fs/libfat_wrapper.h" />
 		<Unit filename="src/fs/sd_fat_devoptab.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/fs/sd_fat_devoptab.h" />
-		<Unit filename="src/include/sys/socket.h" />
-		<Unit filename="src/include/wiiu/ax.h" />
-		<Unit filename="src/include/wiiu/ax/core.h" />
-		<Unit filename="src/include/wiiu/ax/device.h" />
-		<Unit filename="src/include/wiiu/ax/drcvs.h" />
-		<Unit filename="src/include/wiiu/ax/multivoice.h" />
-		<Unit filename="src/include/wiiu/ax/result.h" />
-		<Unit filename="src/include/wiiu/ax/voice.h" />
-		<Unit filename="src/include/wiiu/fs.h" />
-		<Unit filename="src/include/wiiu/gx2.h" />
-		<Unit filename="src/include/wiiu/gx2/common.h" />
-		<Unit filename="src/include/wiiu/gx2/context.h" />
-		<Unit filename="src/include/wiiu/gx2/display.h" />
-		<Unit filename="src/include/wiiu/gx2/displaylist.h" />
-		<Unit filename="src/include/wiiu/gx2/draw.h" />
-		<Unit filename="src/include/wiiu/gx2/enum.h" />
-		<Unit filename="src/include/wiiu/gx2/event.h" />
-		<Unit filename="src/include/wiiu/gx2/mem.h" />
-		<Unit filename="src/include/wiiu/gx2/registers.h" />
-		<Unit filename="src/include/wiiu/gx2/sampler.h" />
-		<Unit filename="src/include/wiiu/gx2/shaders.h" />
-		<Unit filename="src/include/wiiu/gx2/state.h" />
-		<Unit filename="src/include/wiiu/gx2/surface.h" />
-		<Unit filename="src/include/wiiu/gx2/swap.h" />
-		<Unit filename="src/include/wiiu/gx2/tessellation.h" />
-		<Unit filename="src/include/wiiu/gx2/texture.h" />
-		<Unit filename="src/include/wiiu/gx2r.h" />
-		<Unit filename="src/include/wiiu/gx2r/buffer.h" />
-		<Unit filename="src/include/wiiu/gx2r/displaylist.h" />
-		<Unit filename="src/include/wiiu/gx2r/draw.h" />
-		<Unit filename="src/include/wiiu/gx2r/mem.h" />
-		<Unit filename="src/include/wiiu/gx2r/resource.h" />
-		<Unit filename="src/include/wiiu/gx2r/surface.h" />
-		<Unit filename="src/include/wiiu/ios.h" />
-		<Unit filename="src/include/wiiu/kpad.h" />
-		<Unit filename="src/include/wiiu/mcp.h" />
-		<Unit filename="src/include/wiiu/mem.h" />
-		<Unit filename="src/include/wiiu/mem/baseheap.h" />
-		<Unit filename="src/include/wiiu/mem/blockheap.h" />
-		<Unit filename="src/include/wiiu/mem/expandedheap.h" />
-		<Unit filename="src/include/wiiu/mem/frameheap.h" />
-		<Unit filename="src/include/wiiu/mem/memheap.h" />
-		<Unit filename="src/include/wiiu/mem/memlist.h" />
-		<Unit filename="src/include/wiiu/mem/unitheap.h" />
-		<Unit filename="src/include/wiiu/mp/taskqueue.h" />
-		<Unit filename="src/include/wiiu/nsyskbd.h" />
-		<Unit filename="src/include/wiiu/os.h" />
-		<Unit filename="src/include/wiiu/os/alarm.h" />
-		<Unit filename="src/include/wiiu/os/atomic64.h" />
-		<Unit filename="src/include/wiiu/os/cache.h" />
-		<Unit filename="src/include/wiiu/os/condition.h" />
-		<Unit filename="src/include/wiiu/os/core.h" />
-		<Unit filename="src/include/wiiu/os/coroutine.h" />
-		<Unit filename="src/include/wiiu/os/debug.h" />
-		<Unit filename="src/include/wiiu/os/dynload.h" />
-		<Unit filename="src/include/wiiu/os/energy.h" />
-		<Unit filename="src/include/wiiu/os/event.h" />
-		<Unit filename="src/include/wiiu/os/exception.h" />
-		<Unit filename="src/include/wiiu/os/fastcondition.h" />
-		<Unit filename="src/include/wiiu/os/fastmutex.h" />
-		<Unit filename="src/include/wiiu/os/foreground.h" />
-		<Unit filename="src/include/wiiu/os/memory.h" />
-		<Unit filename="src/include/wiiu/os/messagequeue.h" />
-		<Unit filename="src/include/wiiu/os/mutex.h" />
-		<Unit filename="src/include/wiiu/os/rendezvous.h" />
-		<Unit filename="src/include/wiiu/os/screen.h" />
-		<Unit filename="src/include/wiiu/os/semaphore.h" />
-		<Unit filename="src/include/wiiu/os/spinlock.h" />
-		<Unit filename="src/include/wiiu/os/systeminfo.h" />
-		<Unit filename="src/include/wiiu/os/thread.h" />
-		<Unit filename="src/include/wiiu/os/time.h" />
-		<Unit filename="src/include/wiiu/os/title.h" />
-		<Unit filename="src/include/wiiu/procui.h" />
-		<Unit filename="src/include/wiiu/sysapp.h" />
-		<Unit filename="src/include/wiiu/syshid.h" />
-		<Unit filename="src/include/wiiu/types.h" />
-		<Unit filename="src/include/wiiu/vpad.h" />
-		<Unit filename="src/include/wiiu/wpad.h" />
 		<Unit filename="src/kernel/kernel_functions.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -264,29 +189,25 @@
 		<Unit filename="src/kernel/syscalls_asm.S" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/main.h" />
+		<Unit filename="src/modpackSelector.cpp" />
+		<Unit filename="src/modpackSelector.h" />
 		<Unit filename="src/patcher/fs_function_patcher.cpp" />
 		<Unit filename="src/patcher/fs_function_patcher.h" />
 		<Unit filename="src/patcher/fs_function_utils.cpp" />
 		<Unit filename="src/patcher/fs_function_utils.h" />
 		<Unit filename="src/system/OSThread.h" />
-		<Unit filename="src/system/dynamic.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="src/system/dynamic.h" />
 		<Unit filename="src/system/exception_handler.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/system/exception_handler.h" />
-		<Unit filename="src/system/imports.h" />
 		<Unit filename="src/system/memory.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/system/memory.h" />
-		<Unit filename="src/system/stubs_elf.S" />
 		<Unit filename="src/utils/Directory.cpp" />
 		<Unit filename="src/utils/Directory.h" />
-		<Unit filename="src/utils/FileReplacer.cpp" />
-		<Unit filename="src/utils/FileReplacer.h" />
+		<Unit filename="src/utils/FileReplacerUtils.cpp" />
+		<Unit filename="src/utils/FileReplacerUtils.h" />
 		<Unit filename="src/utils/StringTools.cpp" />
 		<Unit filename="src/utils/StringTools.h" />
 		<Unit filename="src/utils/function_patcher.cpp" />
@@ -295,9 +216,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/utils/logger.h" />
-		<Unit filename="src/utils/mcpHook.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="src/utils/mcpHook.cpp" />
 		<Unit filename="src/utils/mcpHook.h" />
 		<Extensions>
