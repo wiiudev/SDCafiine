@@ -64,11 +64,6 @@ extern "C" int Menu_Main(void)
 
     FileReplacerUtils::getInstance()->StartAsyncThread();
 
-    if(isFirstBoot){
-        ExecuteIOSExploitWithDefaultConfig();
-    }
-
-
     log_printf("Mount SD partition\n");
     Init_SD();
 
@@ -160,8 +155,11 @@ s32 isInMiiMakerHBL(){
 void Init_SD() {
     log_printf("Mount fake\n");
     mount_fake();
-    int res = IOSUHAX_Open(NULL); //This is not working properly..
-
+    int res = IOSUHAX_Open(NULL);
+    if(res < 0){
+        ExecuteIOSExploitWithDefaultConfig();
+        return;
+    }
     /*if(res < 0){ This is the haxchi work around. But it breaks disc reading. so well.. mocha 1, haxchi 0.
         res = MCPHookOpen();
         gUsingLibIOSUHAX = 2;

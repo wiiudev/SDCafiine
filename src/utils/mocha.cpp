@@ -6,6 +6,7 @@ https://raw.githubusercontent.com/dimok789/mocha/
 #include <string.h>
 #include <stdio.h>
 #include "dynamic_libs/os_functions.h"
+#include "utils/logger.h"
 #include "mocha.h"
 
 #define ALIGN4(x)           (((x) + 3) & ~3)
@@ -385,11 +386,10 @@ static int uhs_write32(int dev_uhs_0_handle, int arm_addr, int val)
    return IOS_Ioctl(dev_uhs_0_handle, 0x15, request_buffer, sizeof(request_buffer), output_buffer, sizeof(output_buffer));
 }
 
-int ExecuteIOSExploit(cfw_config_t * config)
-{
+int ExecuteIOSExploit(cfw_config_t * config){
+    log_printf("[ExecuteIOSExploit] Running ExecuteIOSExploit\n");
     int iosuhaxFd = IOS_Open("/dev/iosuhax", 0);
-    if(iosuhaxFd >= 0)
-    {
+    if(iosuhaxFd >= 0){
         int dummy = 0;
 
         IOS_Ioctl(iosuhaxFd, 0x03, &dummy, sizeof(dummy), &dummy, sizeof(dummy));
@@ -402,8 +402,10 @@ int ExecuteIOSExploit(cfw_config_t * config)
 
     //! execute exploit
     int dev_uhs_0_handle = IOS_Open("/dev/uhs/0", 0);
-    if(dev_uhs_0_handle < 0)
+    if(dev_uhs_0_handle < 0){
+        log_printf("[ExecuteIOSExploit] Failed to open \"/dev/uhs/0\"\n");
         return dev_uhs_0_handle;
+    }
 
     uhs_exploit_init(dev_uhs_0_handle, config);
     uhs_write32(dev_uhs_0_handle, CHAIN_START + 0x14, CHAIN_START + 0x14 + 0x4 + 0x20);
@@ -413,10 +415,11 @@ int ExecuteIOSExploit(cfw_config_t * config)
     uhs_write32(dev_uhs_0_handle, CHAIN_START, 0x1012392b); // pop {R4-R6,PC}
 
     IOS_Close(dev_uhs_0_handle);
+    log_printf("[ExecuteIOSExploit] done\n");
     return 0;
 }
 
-int ExecuteIOSExploitWithDefaultConfig(){
+void ExecuteIOSExploitWithDefaultConfig(){
     cfw_config_t config;
     config.viewMode = 0;
     config.directLaunch = 0;

@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-int ExecuteIOSExploitWithDefaultConfig();
+void ExecuteIOSExploitWithDefaultConfig();
 
 #ifdef __cplusplus
 }

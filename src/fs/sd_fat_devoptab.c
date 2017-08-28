@@ -943,15 +943,15 @@ No memory is free'd here. Maybe a problem?!?!?
 */
 
 void deleteDevTabsNames(){
-    const devoptab_t *devoptab = NULL;
-    u32 test = devoptab_list[STD_MAX-1];
+    const devoptab_t * devoptab = NULL;
+    u32 last_entry = (u32) devoptab_list[STD_MAX-1];
     for (int i = 3; i < STD_MAX; i++) {
         devoptab = devoptab_list[i];
 
         if (devoptab) {
             //log_printf("check devotab %d %08X\n",i,devoptab);
-            if(devoptab != test){
-                devoptab_list[i] = test;
+            if((u32) devoptab != last_entry){
+                devoptab_list[i] = (const devoptab_t *)last_entry;
                 //log_printf("Removed devotab %d %08X %08X %08X\n",i,devoptab,devoptab->name,devoptab->deviceData);
             }
         }
