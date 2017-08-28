@@ -29,6 +29,7 @@
 #include "system/exception_handler.h"
 #include "system/OSThread.h"
 #include "utils/mcpHook.h"
+#include "utils/mocha.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -62,6 +63,11 @@ extern "C" int Menu_Main(void)
     gSDInitDone = 0;
 
     FileReplacerUtils::getInstance()->StartAsyncThread();
+
+    if(isFirstBoot){
+        ExecuteIOSExploitWithDefaultConfig();
+    }
+
 
     log_printf("Mount SD partition\n");
     Init_SD();
