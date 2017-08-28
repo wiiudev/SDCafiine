@@ -75,9 +75,9 @@ If the result contains our mask, we just straight to the OS functions.
 int setErrorFlag(int error){
     int result = error;
     if(error == -1){
-        error = CHECKED_WITH_ALL_ERRORS;
+        result = CHECKED_WITH_ALL_ERRORS;
     }else{
-        error |= CHECKED_MASK;
+        result |= CHECKED_MASK;
     }
     return result;
 }
@@ -92,7 +92,7 @@ int checkErrorFlag(int * error){
         *error = -1;
         return true;
     }else if ((*error & CHECKED_MASK) == CHECKED_MASK){
-        *error |= CHECKED_MASK;
+        *error &= ~CHECKED_MASK;
         return true;
     }
     return false;
