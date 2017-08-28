@@ -42,7 +42,7 @@ class FileReplacerUtils{
 
         static void destroyInstance() {
             if(instance){
-                while(instance->serverHasStopped){
+                while(!instance->serverHasStopped){
                     os_usleep(1000);
                 }
                 os_usleep(10000);
@@ -76,6 +76,8 @@ class FileReplacerUtils{
 
 	private:
 	    FileReplacerUtils(){
+            OSInitMessageQueue(&gFSQueue, gFSQueueMessages, FS_QUEUE_MESSAGE_COUNT);
+            log_printf("FileReplacerUtils()[LINE %d]: Init queue done! \n",__LINE__);
 	    }
 
         void addHandleInternal(int handle){

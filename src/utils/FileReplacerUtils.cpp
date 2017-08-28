@@ -18,10 +18,6 @@ void FileReplacerUtils::DoAsyncThreadInternal(){
     serverHasStopped = 0;
     log_printf("DoAsyncThreadInternal()[LINE %d]: FSAsyncServer started! \n",__LINE__);
 
-    OSInitMessageQueue(&gFSQueue, gFSQueueMessages, FS_QUEUE_MESSAGE_COUNT);
-
-    log_printf("DoAsyncThreadInternal()[LINE %d]: Init queue done! \n",__LINE__);
-
     OSMessage message;
     void (*callback)(CustomAsyncParam *);
     while(true){
