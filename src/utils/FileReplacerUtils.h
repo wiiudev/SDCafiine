@@ -42,6 +42,7 @@ class FileReplacerUtils{
 
         static void destroyInstance() {
             if(instance){
+                instance->StopAsyncThread();
                 while(!instance->serverHasStopped){
                     os_usleep(1000);
                 }
@@ -68,7 +69,7 @@ class FileReplacerUtils{
         void StartAsyncThread();
 
         void StopAsyncThread(){
-            log_printf("StopAsyncThread\n");
+            DEBUG_FUNCTION_LINE("StopAsyncThread\n");
             OSMessage message;
             message.message = 0xDEADBEEF;
             while(!OSSendMessage(&gFSQueue,&message,OS_MESSAGE_NOBLOCK));
@@ -77,7 +78,7 @@ class FileReplacerUtils{
 	private:
 	    FileReplacerUtils(){
             OSInitMessageQueue(&gFSQueue, gFSQueueMessages, FS_QUEUE_MESSAGE_COUNT);
-            log_printf("FileReplacerUtils()[LINE %d]: Init queue done! \n",__LINE__);
+            DEBUG_FUNCTION_LINE("Init queue done! \n");
 	    }
 
         void addHandleInternal(int handle){

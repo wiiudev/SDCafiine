@@ -16,28 +16,29 @@ void FileReplacerUtils::DoAsyncThread(CThread *thread, void *arg){
 
 void FileReplacerUtils::DoAsyncThreadInternal(){
     serverHasStopped = 0;
-    log_printf("DoAsyncThreadInternal()[LINE %d]: FSAsyncServer started! \n",__LINE__);
+    DEBUG_FUNCTION_LINE("FSAsyncServer started! \n");
 
     OSMessage message;
     void (*callback)(CustomAsyncParam *);
+    CustomAsyncParam cParam;
     while(true){
-        if(DEBUG_LOG){log_printf("DoAsyncThreadInternal()[LINE %d]: Waiting for message\n",__LINE__);}
+        if(DEBUG_LOG){DEBUG_FUNCTION_LINE("Waiting for message\n");}
         if(!OSReceiveMessage(&gFSQueue,&message,OS_MESSAGE_BLOCK)){
             //os_usleep(1000*100);
             continue;
         }
-        if(DEBUG_LOG){log_printf("DoAsyncThreadInternal()[LINE %d]: Received message %08X\n",__LINE__,message.message);}
+        if(DEBUG_LOG){DEBUG_FUNCTION_LINE("Received message %08X\n",message.message);}
         if(message.message == 0xDEADBEEF){
-            log_printf("DoAsyncThreadInternal()[LINE %d]: We should stop the server\n",__LINE__);
+            DEBUG_FUNCTION_LINE("We should stop the server\n");
             break;
         }
 
         callback = (void(*)(CustomAsyncParam *))message.message;
         CustomAsyncParam * param = (CustomAsyncParam *)message.data0;
-
-        if(DEBUG_LOG){log_printf("DoAsyncThreadInternal()[LINE %d]: Calling callback at %08X, with %08X\n",__LINE__,callback,param);}
-        callback(param);
+        memcpy(&cParam,param,sizeof(CustomAsyncParam));
         free(param);
+        if(DEBUG_LOG){DEBUG_FUNCTION_LINE("Calling callback at %08X, with %08X\n",callback,&cParam);}
+        callback(&cParam);
     }
     serverHasStopped = 1;
 }
@@ -61,9 +62,11 @@ FSAsyncResult * FileReplacerUtils::getNewAsyncParamPointer(){
 void FileReplacerUtils::sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncParams* asyncParams,int status){
     if(asyncParams != NULL){
         if(asyncParams->userCallback != NULL){ //Using the userCallback
+            if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("userCallback %08X userContext %08X\n",asyncParams->userCallback,asyncParams->userContext); }
             asyncParams->userCallback(client,cmd,status,asyncParams->userContext);
             return;
         }else{
+            if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("asyncParams->ioMsgQueue %08X \n",asyncParams->ioMsgQueue); }
             FSAsyncResult * result = FileReplacerUtils::getNewAsyncParamPointer();
             FSMessage message;
             result->userParams.userCallback = asyncParams->userCallback;
