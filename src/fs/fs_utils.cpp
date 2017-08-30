@@ -8,6 +8,8 @@
 #include "dynamic_libs/fs_defs.h"
 #include "dynamic_libs/fs_functions.h"
 #include "utils/logger.h"
+#include "utils/StringTools.h"
+#include "common/retain_vars.h"
 
 int MountFS(void *pClient, void *pCmd, char **mount_path){
     int result = -1;
@@ -205,13 +207,34 @@ int is_gamefile(const char *path) {
 char * getPathWithNewBase(const char * inPath, const char * newBase){
     if(inPath == NULL || newBase == NULL || !(strlen(newBase) > 0)) return NULL;
     char * relativePath = getRelativePath(inPath);
-    if(relativePath == NULL) return NULL;
-
     char * result = NULL;
+
+    /*
+    if(relativePath == NULL){
+        if(strlen(gModFolder) > 0){
+            int file = 0;
+            if(endsWith(inPath,BOOT_TV_TEX_TGA,-1,-1)){ file = 1;}
+            else if(endsWith(inPath,BOOT_DRC_TEX_TGA,-1,-1)){ file = 2;}
+            else if(endsWith(inPath,BOOT_SOUND_BTSND,-1,-1)){ file = 3;}
+            if(file == 0){ return NULL;}
+
+            result = (char*)malloc((sizeof(char) * (strlen(newBase) +1 + strlen(META_FOLDER) + 1 + 20) + 1));
+            if(result == NULL){
+                DEBUG_FUNCTION_LINE("malloc for result failed.\n");
+                return NULL;
+            }
+            if(file == 1){sprintf(result,"%s/%s/%s",newBase,META_FOLDER,BOOT_TV_TEX_TGA);}
+            if(file == 2){sprintf(result,"%s/%s/%s",newBase,META_FOLDER,BOOT_DRC_TEX_TGA);}
+            if(file == 3){sprintf(result,"%s/%s/%s",newBase,META_FOLDER,BOOT_SOUND_BTSND);}
+            return result;
+        }
+
+        return NULL;
+    }*/
 
     result = (char*)malloc((sizeof(char) * (strlen(newBase) +1+ strlen(relativePath))) + 1);
     if(result == NULL){
-        log_printf("malloc for result failed.\n");
+        DEBUG_FUNCTION_LINE("malloc for result failed.\n");
         return NULL;
     }
     sprintf(result,"%s/%s",newBase,relativePath);
@@ -225,6 +248,7 @@ char * getPathWithNewBase(const char * inPath, const char * newBase){
 char * getRelativePath(const char *path){
     if(path == NULL) return NULL;
     char * pathForCheck = NULL;
+
     int gameFile = is_gamefile(path);
     if(gameFile > 0) {
         //if(DEBUG_LOG) log_printf("getNewPath %s\n", path);
@@ -251,7 +275,7 @@ char * getRelativePath(const char *path){
 
             pathForCheck = (char*)malloc(sizeof(CONTENT_FOLDER) + 1 + (sizeof(char) * (strlen(pathForCheckInternal) + 1)));
             if(pathForCheck == NULL){
-                log_printf("malloc failed\n");
+                DEBUG_FUNCTION_LINE("malloc failed\n");
                 return NULL;
             }
             sprintf(pathForCheck,"%s/%s",CONTENT_FOLDER,pathForCheckInternal);
@@ -268,7 +292,7 @@ char * getRelativePath(const char *path){
 
             pathForCheck = (char*)malloc(sizeof(AOC_FOLDER) + 1 + (sizeof(char) * (strlen(pathForCheckInternal) + 1)));
             if(pathForCheck == NULL){
-                log_printf("malloc failed\n");
+                DEBUG_FUNCTION_LINE("malloc failed\n");
                 return NULL;
             }
             sprintf(pathForCheck,"%s/%s",AOC_FOLDER,pathForCheckInternal);
