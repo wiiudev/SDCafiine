@@ -387,7 +387,7 @@ static int uhs_write32(int dev_uhs_0_handle, int arm_addr, int val)
 }
 
 int ExecuteIOSExploit(cfw_config_t * config){
-    log_printf("[ExecuteIOSExploit] Running ExecuteIOSExploit\n");
+    DEBUG_FUNCTION_LINE("Running ExecuteIOSExploit\n");
     int iosuhaxFd = IOS_Open("/dev/iosuhax", 0);
     if(iosuhaxFd >= 0){
         int dummy = 0;
@@ -403,7 +403,7 @@ int ExecuteIOSExploit(cfw_config_t * config){
     //! execute exploit
     int dev_uhs_0_handle = IOS_Open("/dev/uhs/0", 0);
     if(dev_uhs_0_handle < 0){
-        log_printf("[ExecuteIOSExploit] Failed to open \"/dev/uhs/0\"\n");
+        DEBUG_FUNCTION_LINE("Failed to open \"/dev/uhs/0\"\n");
         return dev_uhs_0_handle;
     }
 
@@ -415,7 +415,7 @@ int ExecuteIOSExploit(cfw_config_t * config){
     uhs_write32(dev_uhs_0_handle, CHAIN_START, 0x1012392b); // pop {R4-R6,PC}
 
     IOS_Close(dev_uhs_0_handle);
-    log_printf("[ExecuteIOSExploit] done\n");
+    DEBUG_FUNCTION_LINE("Function end\n");
     return 0;
 }
 
