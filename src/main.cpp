@@ -74,7 +74,7 @@ extern "C" int Menu_Main(void){
 
     FileReplacerUtils::getInstance()->StartAsyncThread();
 
-    gLastMetaPath[0] = 0;
+    //gLastMetaPath[0] = 0;
 
     //Reset everything when were going back to the Mii Maker
     if(!isFirstBoot && isInMiiMakerHBL()){
