@@ -61,6 +61,7 @@
 		<Unit filename="build/main.d" />
 		<Unit filename="build/mcpHook.d" />
 		<Unit filename="build/memory.d" />
+		<Unit filename="build/mocha.d" />
 		<Unit filename="build/modpackSelector.d" />
 		<Unit filename="build/nfp_functions.d" />
 		<Unit filename="build/nn_act_functions.d" />
@@ -167,9 +168,7 @@
 		<Unit filename="src/fs/CFile.hpp" />
 		<Unit filename="src/fs/DirList.cpp" />
 		<Unit filename="src/fs/DirList.h" />
-		<Unit filename="src/fs/fs_utils.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="src/fs/fs_utils.cpp" />
 		<Unit filename="src/fs/fs_utils.h" />
 		<Unit filename="src/fs/libfat_wrapper.cpp" />
 		<Unit filename="src/fs/libfat_wrapper.h" />
@@ -189,8 +188,307 @@
 		<Unit filename="src/kernel/syscalls_asm.S" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/main.h" />
+		<Unit filename="src/mocha/common/config_types.h" />
+		<Unit filename="src/mocha/common/kernel_commands.h" />
+		<Unit filename="src/mocha/ios_acp/build/main.d" />
+		<Unit filename="src/mocha/ios_acp/ios_acp.bin.h" />
+		<Unit filename="src/mocha/ios_acp/ios_acp_syms.h" />
+		<Unit filename="src/mocha/ios_acp/source/imports.h" />
+		<Unit filename="src/mocha/ios_acp/source/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_acp/source/types.h" />
+		<Unit filename="src/mocha/ios_bsp/build/fsa.d" />
+		<Unit filename="src/mocha/ios_bsp/build/seeprom.d" />
+		<Unit filename="src/mocha/ios_bsp/build/seeprom_asm.d" />
+		<Unit filename="src/mocha/ios_bsp/build/svc.d" />
+		<Unit filename="src/mocha/ios_bsp/ios_bsp.bin.h" />
+		<Unit filename="src/mocha/ios_bsp/ios_bsp_syms.h" />
+		<Unit filename="src/mocha/ios_bsp/source/fsa.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_bsp/source/fsa.h" />
+		<Unit filename="src/mocha/ios_bsp/source/seeprom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_bsp/source/seeprom_asm.s" />
+		<Unit filename="src/mocha/ios_bsp/source/svc.h" />
+		<Unit filename="src/mocha/ios_bsp/source/svc.s" />
+		<Unit filename="src/mocha/ios_bsp/source/types.h" />
+		<Unit filename="src/mocha/ios_fs/build/devices.d" />
+		<Unit filename="src/mocha/ios_fs/build/dumper.d" />
+		<Unit filename="src/mocha/ios_fs/build/fat32_format.d" />
+		<Unit filename="src/mocha/ios_fs/build/font.d" />
+		<Unit filename="src/mocha/ios_fs/build/fsa.d" />
+		<Unit filename="src/mocha/ios_fs/build/function_hooks.d" />
+		<Unit filename="src/mocha/ios_fs/build/main.d" />
+		<Unit filename="src/mocha/ios_fs/build/mlcio.d" />
+		<Unit filename="src/mocha/ios_fs/build/sdio.d" />
+		<Unit filename="src/mocha/ios_fs/build/svc.d" />
+		<Unit filename="src/mocha/ios_fs/build/text.d" />
+		<Unit filename="src/mocha/ios_fs/ios_fs.bin.h" />
+		<Unit filename="src/mocha/ios_fs/ios_fs_syms.h" />
+		<Unit filename="src/mocha/ios_fs/source/devices.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/devices.h" />
+		<Unit filename="src/mocha/ios_fs/source/dumper.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/dumper.h" />
+		<Unit filename="src/mocha/ios_fs/source/fat32_format.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/fat32_format.h" />
+		<Unit filename="src/mocha/ios_fs/source/font.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/font_bin.h" />
+		<Unit filename="src/mocha/ios_fs/source/fsa.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/fsa.h" />
+		<Unit filename="src/mocha/ios_fs/source/function_hooks.s" />
+		<Unit filename="src/mocha/ios_fs/source/hardware_registers.h" />
+		<Unit filename="src/mocha/ios_fs/source/imports.h" />
+		<Unit filename="src/mocha/ios_fs/source/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/mlcio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/mlcio.h" />
+		<Unit filename="src/mocha/ios_fs/source/sdio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/sdio.h" />
+		<Unit filename="src/mocha/ios_fs/source/svc.h" />
+		<Unit filename="src/mocha/ios_fs/source/svc.s" />
+		<Unit filename="src/mocha/ios_fs/source/text.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_fs/source/text.h" />
+		<Unit filename="src/mocha/ios_fs/source/types.h" />
+		<Unit filename="src/mocha/ios_kernel/build/crt0.d" />
+		<Unit filename="src/mocha/ios_kernel/build/elf_patcher.d" />
+		<Unit filename="src/mocha/ios_kernel/build/exception_handler.d" />
+		<Unit filename="src/mocha/ios_kernel/build/fsa.d" />
+		<Unit filename="src/mocha/ios_kernel/build/instant_patches.d" />
+		<Unit filename="src/mocha/ios_kernel/build/ios_acp_patches.d" />
+		<Unit filename="src/mocha/ios_kernel/build/ios_acp_patches_asm.d" />
+		<Unit filename="src/mocha/ios_kernel/build/ios_bsp_patches.d" />
+		<Unit filename="src/mocha/ios_kernel/build/ios_fs_patches.d" />
+		<Unit filename="src/mocha/ios_kernel/build/ios_fs_patches_asm.d" />
+		<Unit filename="src/mocha/ios_kernel/build/ios_mcp_patches.d" />
+		<Unit filename="src/mocha/ios_kernel/build/ios_mcp_patches_asm.d" />
+		<Unit filename="src/mocha/ios_kernel/build/kernel_patches.d" />
+		<Unit filename="src/mocha/ios_kernel/build/kernel_patches_asm.d" />
+		<Unit filename="src/mocha/ios_kernel/build/main.d" />
+		<Unit filename="src/mocha/ios_kernel/build/redirection_setup.d" />
+		<Unit filename="src/mocha/ios_kernel/build/text.d" />
+		<Unit filename="src/mocha/ios_kernel/build/utils.d" />
+		<Unit filename="src/mocha/ios_kernel/ios_kernel.bin.h" />
+		<Unit filename="src/mocha/ios_kernel/ios_kernel_syms.h" />
+		<Unit filename="src/mocha/ios_kernel/source/config.h" />
+		<Unit filename="src/mocha/ios_kernel/source/crt0.s" />
+		<Unit filename="src/mocha/ios_kernel/source/elf_abi.h" />
+		<Unit filename="src/mocha/ios_kernel/source/elf_patcher.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/elf_patcher.h" />
+		<Unit filename="src/mocha/ios_kernel/source/exception_handler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/exception_handler.h" />
+		<Unit filename="src/mocha/ios_kernel/source/font_bin.h" />
+		<Unit filename="src/mocha/ios_kernel/source/fsa.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/fsa.h" />
+		<Unit filename="src/mocha/ios_kernel/source/instant_patches.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/instant_patches.h" />
+		<Unit filename="src/mocha/ios_kernel/source/ios_acp_patches.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/ios_acp_patches.h" />
+		<Unit filename="src/mocha/ios_kernel/source/ios_acp_patches_asm.s" />
+		<Unit filename="src/mocha/ios_kernel/source/ios_bsp_patches.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/ios_bsp_patches.h" />
+		<Unit filename="src/mocha/ios_kernel/source/ios_fs_patches.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/ios_fs_patches.h" />
+		<Unit filename="src/mocha/ios_kernel/source/ios_fs_patches_asm.s" />
+		<Unit filename="src/mocha/ios_kernel/source/ios_mcp_patches.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/ios_mcp_patches.h" />
+		<Unit filename="src/mocha/ios_kernel/source/ios_mcp_patches_asm.s" />
+		<Unit filename="src/mocha/ios_kernel/source/kernel_patches.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/kernel_patches.h" />
+		<Unit filename="src/mocha/ios_kernel/source/kernel_patches_asm.s" />
+		<Unit filename="src/mocha/ios_kernel/source/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/redirection_setup.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/redirection_setup.h" />
+		<Unit filename="src/mocha/ios_kernel/source/text.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/text.h" />
+		<Unit filename="src/mocha/ios_kernel/source/types.h" />
+		<Unit filename="src/mocha/ios_kernel/source/utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_kernel/source/utils.h" />
+		<Unit filename="src/mocha/ios_mcp/build/crt0.d" />
+		<Unit filename="src/mocha/ios_mcp/build/font.d" />
+		<Unit filename="src/mocha/ios_mcp/build/fsa.d" />
+		<Unit filename="src/mocha/ios_mcp/build/imports.d" />
+		<Unit filename="src/mocha/ios_mcp/build/ipc.d" />
+		<Unit filename="src/mocha/ios_mcp/build/logger.d" />
+		<Unit filename="src/mocha/ios_mcp/build/main.d" />
+		<Unit filename="src/mocha/ios_mcp/build/net_ifmgr_ncl.d" />
+		<Unit filename="src/mocha/ios_mcp/build/socket.d" />
+		<Unit filename="src/mocha/ios_mcp/build/svc.d" />
+		<Unit filename="src/mocha/ios_mcp/build/text.d" />
+		<Unit filename="src/mocha/ios_mcp/build/wupserver.d" />
+		<Unit filename="src/mocha/ios_mcp/ios_mcp.bin.h" />
+		<Unit filename="src/mocha/ios_mcp/ios_mcp_syms.h" />
+		<Unit filename="src/mocha/ios_mcp/source/crt0.s" />
+		<Unit filename="src/mocha/ios_mcp/source/font.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/font_bin.h" />
+		<Unit filename="src/mocha/ios_mcp/source/fsa.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/fsa.h" />
+		<Unit filename="src/mocha/ios_mcp/source/imports.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/imports.h" />
+		<Unit filename="src/mocha/ios_mcp/source/ipc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/ipc.h" />
+		<Unit filename="src/mocha/ios_mcp/source/ipc_types.h" />
+		<Unit filename="src/mocha/ios_mcp/source/logger.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/logger.h" />
+		<Unit filename="src/mocha/ios_mcp/source/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/net_ifmgr_ncl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/net_ifmgr_ncl.h" />
+		<Unit filename="src/mocha/ios_mcp/source/socket.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/socket.h" />
+		<Unit filename="src/mocha/ios_mcp/source/svc.h" />
+		<Unit filename="src/mocha/ios_mcp/source/svc.s" />
+		<Unit filename="src/mocha/ios_mcp/source/text.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/text.h" />
+		<Unit filename="src/mocha/ios_mcp/source/types.h" />
+		<Unit filename="src/mocha/ios_mcp/source/wupserver.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/ios_mcp/source/wupserver.h" />
+		<Unit filename="src/mocha/ios_usb/build/crt0.d" />
+		<Unit filename="src/mocha/ios_usb/build/main.d" />
+		<Unit filename="src/mocha/ios_usb/ios_usb.bin.h" />
+		<Unit filename="src/mocha/ios_usb/ios_usb_syms.h" />
+		<Unit filename="src/mocha/ios_usb/source/crt0.s" />
+		<Unit filename="src/mocha/ios_usb/source/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/cfw_config.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/cfw_config.h" />
+		<Unit filename="src/mocha/src/common/common.h" />
+		<Unit filename="src/mocha/src/common/fs_defs.h" />
+		<Unit filename="src/mocha/src/common/os_defs.h" />
+		<Unit filename="src/mocha/src/common/types.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/fs_defs.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/fs_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/dynamic_libs/fs_functions.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/gx2_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/dynamic_libs/gx2_functions.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/gx2_types.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/os_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/dynamic_libs/os_functions.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/os_types.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/socket_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/dynamic_libs/socket_functions.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/sys_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/dynamic_libs/sys_functions.h" />
+		<Unit filename="src/mocha/src/dynamic_libs/vpad_functions.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/dynamic_libs/vpad_functions.h" />
+		<Unit filename="src/mocha/src/entry.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/fs/fs_utils.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/fs/fs_utils.h" />
+		<Unit filename="src/mocha/src/fs/sd_fat_devoptab.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/fs/sd_fat_devoptab.h" />
+		<Unit filename="src/mocha/src/ios_exploit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/ios_exploit.h" />
+		<Unit filename="src/mocha/src/main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/main.h" />
+		<Unit filename="src/mocha/src/menu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/menu.h" />
+		<Unit filename="src/mocha/src/system/exception_handler.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/system/exception_handler.h" />
+		<Unit filename="src/mocha/src/system/memory.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/system/memory.h" />
+		<Unit filename="src/mocha/src/utils/logger.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/mocha/src/utils/logger.h" />
+		<Unit filename="src/mocha/src/utils/utils.h" />
 		<Unit filename="src/modpackSelector.cpp" />
 		<Unit filename="src/modpackSelector.h" />
+		<Unit filename="src/patcher/extra_app_function_patcher.h" />
 		<Unit filename="src/patcher/fs_function_patcher.cpp" />
 		<Unit filename="src/patcher/fs_function_patcher.h" />
 		<Unit filename="src/patcher/fs_function_utils.cpp" />
@@ -218,6 +516,8 @@
 		<Unit filename="src/utils/logger.h" />
 		<Unit filename="src/utils/mcpHook.cpp" />
 		<Unit filename="src/utils/mcpHook.h" />
+		<Unit filename="src/utils/mocha.cpp" />
+		<Unit filename="src/utils/mocha.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

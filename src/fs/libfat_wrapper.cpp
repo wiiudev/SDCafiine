@@ -9,10 +9,13 @@
 #include "fs_utils.h"
 #include "utils/logger.h"
 
+//Wii U fails to allocate memory if we do the functions async. =/
+#define DO_REAL_ASYNC       0
+
 void libfat_FSCloseFileAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSCloseFileAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSCloseFileAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -25,22 +28,40 @@ void libfat_FSCloseFileAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSCloseFileAsyncCallback: params: %08X. We need to use the OS Function\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSCloseFileAsyncCallback)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *);
     real_FSCloseFileAsyncCallback = (int(*)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *)) params->realFunction;
     int res = real_FSCloseFileAsyncCallback(params->pClient, params->pCmd, params->handle, params->error,&my_asyncparams);
-    if(DEBUG_LOG){ log_printf("libfat_FSCloseFileAsyncCallback: result real function %d\n",res); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSCloseFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSCloseFileAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSCloseFile(fd)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function\n"); }
+
+        int (*real_FSCloseFileAsyncCallback)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *);
+        real_FSCloseFileAsyncCallback = (int(*)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *)) realFunction;
+        return real_FSCloseFileAsyncCallback(pClient, pCmd, fd, error ,asyncParams);
+    }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called!\n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSCloseFileAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
@@ -62,20 +83,20 @@ int libfat_FSCloseFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int err
 }
 
 int libfat_FSCloseFile(int handle){
-    if(DEBUG_LOG){ log_printf("libfat_FSCloseFile: for handle: %08X \n",handle); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
     if(FileReplacerUtils::hasHandle(handle)){
         FileReplacerUtils::removeHandle(handle);
         close(handle);
-        if(DEBUG_LOG){log_printf("libfat_FSCloseFile: closed %d\n",handle);}
+        DEBUG_FUNCTION_LINE("closed handle %08X\n",handle);
         return FS_STATUS_OK;
     }
     return USE_OS_FS_FUNCTION;
 }
 
 void libfat_FSGetPosFileAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetPosFileAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSGetPosFileAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -88,22 +109,41 @@ void libfat_FSGetPosFileAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSGetPosFileAsyncCallback: params: %08X. We need to use the OS Function\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSGetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int, int *, int, FSAsyncParams *);
     real_FSGetPosFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, int *, int, FSAsyncParams *)) params->realFunction;
     int res = real_FSGetPosFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->posPtr, params->error, &my_asyncparams);
-    if(DEBUG_LOG){ log_printf("libfat_FSGetPosFileAsyncCallback: result real function %d\n",res); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSGetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int *pos, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetPosFileAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSGetPosFile(fd,pos)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function\n"); }
+
+        int (*real_FSGetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int, int *, int, FSAsyncParams *);
+        real_FSGetPosFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, int *, int, FSAsyncParams *)) realFunction;
+        return real_FSGetPosFileAsyncFunc(pClient, pCmd, fd, pos, error, asyncParams);
+    }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSGetPosFileAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
@@ -126,12 +166,12 @@ int libfat_FSGetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int fd, int *p
 }
 
 int libfat_FSGetPosFile(int handle,int * pos){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetPosFile: for handle: %08X \n",handle); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
     if(FileReplacerUtils::hasHandle(handle)){
         int currentPos = lseek(handle, (size_t)0, SEEK_CUR);
         *pos = currentPos;
 
-        if(DEBUG_LOG){log_printf("libfat_FSGetPosFile: pos %08X\n",*pos);}
+        DEBUG_FUNCTION_LINE("pos %08X for handle %08X\n",*pos,handle);
 
         return FS_STATUS_OK;
     }
@@ -139,9 +179,9 @@ int libfat_FSGetPosFile(int handle,int * pos){
 }
 
 void libfat_FSGetStatAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSGetStatAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     char path[FS_MAX_ENTNAME_SIZE];
@@ -154,33 +194,54 @@ void libfat_FSGetStatAsyncCallback(CustomAsyncParam * params){
 
     int result = USE_OS_FS_FUNCTION;
     if((result = libfat_FSGetStat(path,params->stats)) != USE_OS_FS_FUNCTION){
-        log_printf("async libfat_FSGetStat success. for params %08X \n",params);
+        DEBUG_FUNCTION_LINE("success. for params %08X \n",params);
         FileReplacerUtils::sendAsyncCommand(params->pClient, params->pCmd, &my_asyncparams, result);
         return;
     }
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatAsyncCallback: params: %08X. We need to use the OS Function\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSGetStatAsyncFunc)(FSClient *, FSCmdBlock *, const char *, FSStat *, int, FSAsyncParams *);
     real_FSGetStatAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, const char *, FSStat *, int, FSAsyncParams *)) params->realFunction;
     int res = real_FSGetStatAsyncFunc(params->pClient, params->pCmd, path, params->stats, params->error, &my_asyncparams);
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatAsyncCallback: result real function %d\n",res); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSGetStatAsync(FSClient *pClient, FSCmdBlock *pCmd, const char *path, FSStat *stats, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSGetStat(path,stats)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function\n"); }
+
+        //If we fail, we fall back to the OS function.
+        int (*real_FSGetStatAsyncFunc)(FSClient *, FSCmdBlock *, const char *, FSStat *, int, FSAsyncParams *);
+        real_FSGetStatAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, const char *, FSStat *, int, FSAsyncParams *)) realFunction;
+        return real_FSGetStatAsyncFunc(pClient, pCmd, path, stats, error, asyncParams);
+    }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSGetStatAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
 
     char * pathCopy = (char *) malloc(sizeof(char) * strlen(path)+1);
     if(pathCopy == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the path param for libfat_FSGetStatAsync!!!\n");
+        free(params);
+        free(new_asyncParams);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the path param!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(pathCopy,path,strlen(path)+1);
@@ -203,17 +264,23 @@ int libfat_FSGetStatAsync(FSClient *pClient, FSCmdBlock *pCmd, const char *path,
 }
 
 int libfat_FSGetStat(const char * path, FSStat * stats){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStat: for path %s\n",path); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called!\n"); }
+    if(gSDInitDone <= SDUSB_MOUNTED_FAKE){
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("SD/USB not initialized.\n"); }
+        return USE_OS_FS_FUNCTION;
+    }
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("for path %s\n",path); }
     int result = USE_OS_FS_FUNCTION;
     char * newPath = getPathWithNewBase(path,gModFolder);
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStat: new path %s\n",newPath); }
     if(newPath != NULL){
+        DEBUG_FUNCTION_LINE("Searching for path %s\n",newPath);
         struct stat path_stat;
         if(stat(newPath, &path_stat) < 0){
             result = USE_OS_FS_FUNCTION;
-            if(DEBUG_LOG){ log_printf("libfat_FSGetStat: failed for path %s\n",newPath); }
+            if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("failed for path %s\n",newPath); }
         }else{
-            if(DEBUG_LOG){ log_printf("libfat_FSGetStat: success! size: %08X for path %s\n",path_stat.st_size,newPath);}
+            DEBUG_FUNCTION_LINE("success! path %s\n",newPath);
             stats->flag = 0;
             if(S_ISDIR(path_stat.st_mode)){
                 stats->flag |= 0;
@@ -234,9 +301,9 @@ int libfat_FSGetStat(const char * path, FSStat * stats){
 }
 
 void libfat_FSGetStatFileAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatFileAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSGetStatFileAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -249,22 +316,43 @@ void libfat_FSGetStatFileAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatFileAsyncCallback: params: %08X. We need to use the OS Function.\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function.\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSGetStatFileAsyncFunc)(FSClient *, FSCmdBlock *, int, FSStat *, int, FSAsyncParams *);
     real_FSGetStatFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, FSStat *, int, FSAsyncParams *)) params->realFunction;
     int res = real_FSGetStatFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->stats, params->error, &my_asyncparams);
-    if(DEBUG_LOG){ log_printf("libfat_FSCloseFileAsyncCallback: result real function %d\n",res); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSGetStatFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int handle, FSStat * stats, int error, FSAsyncParams * asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatFileAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSGetStatFile(handle,stats)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function.\n"); }
+
+        //If we fail, we fall back to the OS function.
+        int (*real_FSGetStatFileAsyncFunc)(FSClient *, FSCmdBlock *, int, FSStat *, int, FSAsyncParams *);
+        real_FSGetStatFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, FSStat *, int, FSAsyncParams *)) realFunction;
+        return real_FSGetStatFileAsyncFunc(pClient, pCmd, handle, stats, error, asyncParams);
+    }
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSGetStatFileAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
@@ -287,11 +375,11 @@ int libfat_FSGetStatFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int handle, F
 }
 
 int libfat_FSGetStatFile(int handle, FSStat * stats){
-    if(DEBUG_LOG){ log_printf("libfat_FSGetStatFile for handle: %08X\n",handle); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X\n",handle); }
     if(FileReplacerUtils::hasHandle(handle)){
         struct stat path_stat;
         if(fstat(handle, &path_stat) < 0){
-            log_printf("libfat_FSGetStatFile failed! handle: %08X\n",handle);
+            DEBUG_FUNCTION_LINE("failed! handle: %08X\n",handle);
             return -1;
         }
 
@@ -301,7 +389,7 @@ int libfat_FSGetStatFile(int handle, FSStat * stats){
         stats->permission = 0x00000444;
         stats->owner_id = 0x10053000;
 
-        if(DEBUG_LOG){log_printf("libfat_FSGetStatFile success! handle: %08X size: %08X\n",handle,stats->size);}
+        DEBUG_FUNCTION_LINE("success! handle: %08X size: %08X\n",handle,stats->size);
 
         return FS_STATUS_OK;
     }
@@ -309,9 +397,9 @@ int libfat_FSGetStatFile(int handle, FSStat * stats){
 }
 
 void libfat_FSIsEofAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSIsEofAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSIsEofAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -324,22 +412,43 @@ void libfat_FSIsEofAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSIsEofAsyncCallback: params: %08X. We need to use the OS Function\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSIsEofAsyncFunc)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *);
     real_FSIsEofAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *)) params->realFunction;
     int res = real_FSIsEofAsyncFunc(params->pClient, params->pCmd, params->handle, params->error, &my_asyncparams);
-    if(DEBUG_LOG){ log_printf("libfat_FSIsEofAsyncCallback: result real function %d\n",res); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSIsEofAsync(FSClient *pClient, FSCmdBlock *pCmd, int handle, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSIsEofAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSIsEof(handle)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function\n"); }
+
+        //If we fail, we fall back to the OS function.
+        int (*real_FSIsEofAsyncFunc)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *);
+        real_FSIsEofAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, int, FSAsyncParams *)) realFunction;
+        return real_FSIsEofAsyncFunc(pClient, pCmd, handle, error, asyncParams);
+    }
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSIsEofAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
@@ -361,7 +470,7 @@ int libfat_FSIsEofAsync(FSClient *pClient, FSCmdBlock *pCmd, int handle, int err
 }
 
 int libfat_FSIsEof(int handle){
-    if(DEBUG_LOG){ log_printf("libfat_FSIsEof for handle: %08X\n",handle); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! handle: %08X\n",handle); }
     int result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasHandle(handle)){
         off_t currentPos = lseek(handle, (off_t) 0, SEEK_CUR);
@@ -373,15 +482,15 @@ int libfat_FSIsEof(int handle){
             lseek(handle, currentPos, SEEK_CUR);
             result = FS_STATUS_OK;
         }
-        if(DEBUG_LOG){log_printf("libfat_FSIsEof: handle: %08X result: %08X\n",handle,result);}
+        DEBUG_FUNCTION_LINE("handle: %08X result: %08X\n",handle,result);
     }
     return result;
 }
 
 void libfat_FSOpenFileAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSOpenFileAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSOpenFileAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -398,29 +507,50 @@ void libfat_FSOpenFileAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSOpenFileAsyncCallback: params: %08X. We need to use the OS Function. Path %s \n",params,path); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function. Path %s \n",params,path); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSOpenFileAsyncCallback)(FSClient *, FSCmdBlock *, const char *, const char *, int *, int, FSAsyncParams *);
     real_FSOpenFileAsyncCallback = (int(*)(FSClient *, FSCmdBlock *, const char *, const char *, int *, int, FSAsyncParams *)) params->realFunction;
     int res = real_FSOpenFileAsyncCallback(params->pClient, params->pCmd, path, params->mode, params->handlePtr, params->error, &my_asyncparams);
-    if(DEBUG_LOG){ log_printf("libfat_FSOpenFileAsyncCallback: result real function %d\n",res); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSOpenFileAsync(FSClient *pClient, FSCmdBlock *pCmd, const char *path, const char *mode, int *handle, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSOpenFileAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSOpenFile(path,mode,handle)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function.\n"); }
+
+        //If we fail, we fall back to the OS function.
+        int (*real_FSOpenFileAsyncCallback)(FSClient *, FSCmdBlock *, const char *, const char *, int *, int, FSAsyncParams *);
+        real_FSOpenFileAsyncCallback = (int(*)(FSClient *, FSCmdBlock *, const char *, const char *, int *, int, FSAsyncParams *)) realFunction;
+        return real_FSOpenFileAsyncCallback(pClient, pCmd, path, mode, handle, error, asyncParams);
+    }
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSOpenFileAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
 
     char * pathCopy = (char *) malloc(sizeof(char) * strlen(path)+1);
     if(pathCopy == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the path param for libfat_FSOpenFileAsync!!!\n");
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the path param!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(pathCopy,path,strlen(path)+1);
@@ -444,21 +574,24 @@ int libfat_FSOpenFileAsync(FSClient *pClient, FSCmdBlock *pCmd, const char *path
 }
 
 int libfat_FSOpenFile(const char * path, const char * mode, int * handle){
-    if(DEBUG_LOG){ log_printf("libfat_FSOpenFile for path: %s and mode %s\n",path,mode); }
+    if(gSDInitDone <= SDUSB_MOUNTED_FAKE){
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! SD/USB not initialized.\n"); }
+        return USE_OS_FS_FUNCTION;
+    }
     int result = USE_OS_FS_FUNCTION;
     char * newPath = getPathWithNewBase(path,gModFolder);
     if(newPath != NULL){
         result = USE_OS_FS_FUNCTION;
-        if(DEBUG_LOG){log_printf("libfat_FSOpenFile: open path: %s\n",newPath);}
+        DEBUG_FUNCTION_LINE("Searching for path %s\n",newPath);
         int fd = open(newPath,O_RDONLY); //TODO: remove hardcoded mode.
         if(fd != -1){
-            if(DEBUG_LOG){log_printf("libfat_FSOpenFile: opened path: %s handle: %08X\n",newPath,fd);}
+            DEBUG_FUNCTION_LINE("opened path: %s handle: %08X\n",newPath,fd);
             FileReplacerUtils::addHandle(fd);
             *handle = fd;
             result = FS_STATUS_OK;
 
         }else{
-            if(DEBUG_LOG){log_printf("libfat_FSOpenFile: failed path: %s\n",newPath);}
+            if(DEBUG_LOG){DEBUG_FUNCTION_LINE("failed path: %s\n",newPath);}
         }
         free(newPath);
         newPath = NULL;
@@ -468,9 +601,9 @@ int libfat_FSOpenFile(const char * path, const char * mode, int * handle){
 }
 
 void libfat_FSReadFileAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFileAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSOpenFileAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -483,21 +616,42 @@ void libfat_FSReadFileAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFileAsyncCallback: params: %08X. We need to use the OS Function\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSReadFileAsyncFunc)(FSClient *, FSCmdBlock *, void *, int, int, int, int, int, FSAsyncParams *);
     real_FSReadFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, void *, int, int, int, int, int, FSAsyncParams *)) params->realFunction;
-    real_FSReadFileAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->handle, params->flag, params->error, &my_asyncparams);
+    int res = real_FSReadFileAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->handle, params->flag, params->error, &my_asyncparams);
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSReadFileAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, int handle, int flag, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFileAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSReadFile(handle,buffer,size,count)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function\n"); }
+
+        //If we fail, we fall back to the OS function.
+        int (*real_FSReadFileAsyncFunc)(FSClient *, FSCmdBlock *, void *, int, int, int, int, int, FSAsyncParams *);
+        real_FSReadFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, void *, int, int, int, int, int, FSAsyncParams *)) realFunction;
+        return real_FSReadFileAsyncFunc(pClient, pCmd, buffer, size, count, handle, flag, error, asyncParams);
+    }
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSReadFileAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
@@ -523,19 +677,19 @@ int libfat_FSReadFileAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buffer, in
 }
 
 int libfat_FSReadFile(int handle,void *buffer,size_t size, size_t count){
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFile: for handle: %08X \n",handle); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! for handle: %08X \n",handle); }
     int result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasHandle(handle)){
         result = read(handle, buffer,size*count);
-        if(DEBUG_LOG){log_printf("libfat_FSReadFile: Tried %08X bytes from handle %08X. result %08X \n",size,handle,result);}
+        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X. result %08X \n",size,handle,result);
     }
     return result;
 }
 
 void libfat_FSReadFileWithPosAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFileWithPosAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSReadFileWithPosAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -548,21 +702,43 @@ void libfat_FSReadFileWithPosAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFileWithPosAsyncCallback: params: %08X. We need to use the OS Function\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSReadFileWithPosAsyncFunc)(FSClient *, FSCmdBlock *, void *, int, int, u32, int, int, int, FSAsyncParams *);
     real_FSReadFileWithPosAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, void *, int, int, u32, int, int, int, FSAsyncParams *)) params->realFunction;
-    real_FSReadFileWithPosAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->pos, params->handle, params->flag, params->error, &my_asyncparams);
+    int res = real_FSReadFileWithPosAsyncFunc(params->pClient, params->pCmd, params->buffer, params->size, params->count, params->pos, params->handle, params->flag, params->error, &my_asyncparams);
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSReadFileWithPosAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, u32 pos, int handle, int flag, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFileWithPosAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSReadFileWithPos(buffer, size, count, pos, handle)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function\n"); }
+
+        //If we fail, we fall back to the OS function.
+        int (*real_FSReadFileWithPosAsyncFunc)(FSClient *, FSCmdBlock *, void *, int, int, u32, int, int, int, FSAsyncParams *);
+        real_FSReadFileWithPosAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, void *, int, int, u32, int, int, int, FSAsyncParams *)) realFunction;
+        return real_FSReadFileWithPosAsyncFunc(pClient, pCmd, buffer, size, count, pos, handle, flag, error, asyncParams);
+    }
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSReadFileWithPosAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
@@ -589,20 +765,20 @@ int libfat_FSReadFileWithPosAsync(FSClient *pClient, FSCmdBlock *pCmd, void *buf
 }
 
 int libfat_FSReadFileWithPos(void *buffer, int size, int count, u32 pos, int handle){
-    if(DEBUG_LOG){ log_printf("libfat_FSReadFileWithPos: for handle: %08X \n",handle); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     int result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasHandle(handle)){
         lseek(handle, pos, SEEK_SET);//TODO check for lseek result.
         result = read(handle, buffer,size*count);
-        if(DEBUG_LOG){log_printf("libfat_FSReadFileWithPos: Tried %08X bytes from handle %08X at pos %08X. result %08X \n",size,handle,pos,result);}
+        DEBUG_FUNCTION_LINE("Reading %08X bytes from handle %08X at pos %08X. result %08X \n",size,handle,pos,result);
     }
     return result;
 }
 
 void libfat_FSSetPosFileAsyncCallback(CustomAsyncParam * params){
-    if(DEBUG_LOG){ log_printf("libfat_FSSetPosFileAsyncCallback: params: %08X \n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! params: %08X \n",params); }
     if(params == NULL){
-        log_printf("!!!WARNING: Given parameter for libfat_FSSetPosFileAsyncCallback was NULL\n");
+        DEBUG_FUNCTION_LINE("!!!WARNING: Given parameter was NULL\n");
     }
 
     FSAsyncParams my_asyncparams;
@@ -615,21 +791,43 @@ void libfat_FSSetPosFileAsyncCallback(CustomAsyncParam * params){
         return;
     }
 
-    if(DEBUG_LOG){ log_printf("libfat_FSSetPosFileAsyncCallback: params: %08X. We need to use the OS Function\n",params); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("params: %08X. We need to use the OS Function\n",params); }
 
     //If we fail, we fall back to the OS function.
     int (*real_FSSetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int, u32, int, FSAsyncParams *);
     real_FSSetPosFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, u32, int, FSAsyncParams *)) params->realFunction;
-    real_FSSetPosFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->pos, params->error, &my_asyncparams);
+    int res = real_FSSetPosFileAsyncFunc(params->pClient, params->pCmd, params->handle, params->pos, params->error, &my_asyncparams);
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("result real function %d\n",res); }
 }
 
 int libfat_FSSetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int handle, u32 pos, int error, FSAsyncParams *asyncParams, void * realFunction){
-    if(DEBUG_LOG){ log_printf("libfat_FSSetPosFileAsync\n"); }
+    if(!DO_REAL_ASYNC){
+        int result = USE_OS_FS_FUNCTION;
+        if((result = libfat_FSSetPosFile(handle,pos)) != USE_OS_FS_FUNCTION){
+            FileReplacerUtils::sendAsyncCommand(pClient, pCmd, asyncParams, result);
+            return FS_STATUS_OK;
+        }
+
+        if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("We need to use the OS Function\n"); }
+
+        //If we fail, we fall back to the OS function.
+        int (*real_FSSetPosFileAsyncFunc)(FSClient *, FSCmdBlock *, int, u32, int, FSAsyncParams *);
+        real_FSSetPosFileAsyncFunc = (int(*)(FSClient *, FSCmdBlock *, int, u32, int, FSAsyncParams *)) realFunction;
+        return real_FSSetPosFileAsyncFunc(pClient, pCmd, handle, pos, error, asyncParams);
+    }
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     CustomAsyncParam *  params = (CustomAsyncParam *) malloc(sizeof(CustomAsyncParam));
+
+    if(params == NULL){
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate memory!!!\n");
+        return FS_STATUS_FATAL_ERROR;
+    }
 
     FSAsyncParams * new_asyncParams = (FSAsyncParams *) malloc(sizeof(FSAsyncParams));
     if(new_asyncParams == NULL){
-        log_printf("!!!Failed to allocate enough space to copy the FSAsyncParams for libfat_FSSetPosFileAsync!!!\n");
+        free(params);
+        DEBUG_FUNCTION_LINE("!!!Failed to allocate enough space to copy the FSAsyncParams!!!\n");
         return FS_STATUS_FATAL_ERROR;
     }
     memcpy(new_asyncParams,asyncParams,sizeof(FSAsyncParams));
@@ -652,7 +850,7 @@ int libfat_FSSetPosFileAsync(FSClient *pClient, FSCmdBlock *pCmd, int handle, u3
 }
 
 int libfat_FSSetPosFile(int handle,u32 pos){
-    if(DEBUG_LOG){ log_printf("libfat_FSSetPosFile: for handle: %08X \n",handle); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("Called! \n"); }
     int result = USE_OS_FS_FUNCTION;
     if(FileReplacerUtils::hasHandle(handle)){
         off_t newOffset = -1;
@@ -660,9 +858,9 @@ int libfat_FSSetPosFile(int handle,u32 pos){
         newOffset = lseek(handle, (off_t)pos, SEEK_SET);
         if(newOffset == (off_t)pos){
             result = FS_STATUS_OK;
-            if(DEBUG_LOG){log_printf("libfat_FSSetPosFile: Set position to %08X for handle %08X\n",pos,handle);}
+            DEBUG_FUNCTION_LINE("Set position to %08X for handle %08X\n",pos,handle);
         }else{
-            log_printf("libfat_FSSetPosFile: Failed set position to %08X for handle %08X\n",pos,handle);
+            DEBUG_FUNCTION_LINE("Failed set position to %08X for handle %08X\n",pos,handle);
         }
 
     }
