@@ -16,7 +16,7 @@ extern "C" {
 #define NAME_PREFIX_USB             "usb:"
 #define WIIU_PATH                   "/wiiu"
 #define IP_TXT                      "ip.txt"
-#define VERSION                     "1.4b (experimental)"
+#define VERSION                     "1.5 (experimental)"
 
 #define CONTENT_FOLDER              "content"
 #define AOC_FOLDER                  "aoc"
