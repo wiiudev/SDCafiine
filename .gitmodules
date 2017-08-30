@@ -3,4 +3,4 @@
 	url = https://github.com/Maschell/dynamic_libs
 [submodule "src/mocha"]
 	path = src/mocha
-	url = https://github.com/dimok789/mocha
+	url = https://github.com/Maschell/mocha
