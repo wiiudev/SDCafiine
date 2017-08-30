@@ -1,4 +1,5 @@
 #include <string>
+
 #include <map>
 #include <string.h>
 #include <stdlib.h>
@@ -18,11 +19,11 @@
 
 #define TEXT_SEL(x, text1, text2)           ((x) ? (text1) : (text2))
 
-void HandleMultiModPacks() {
+void HandleMultiModPacks(u64 titleID/*,bool showMenu*/) {
 	gModFolder[0] = 0;
 
     char TitleIDString[FS_MAX_FULLPATH_SIZE];
-    snprintf(TitleIDString,FS_MAX_FULLPATH_SIZE,"%016llX",OSGetTitleID());
+    snprintf(TitleIDString,FS_MAX_FULLPATH_SIZE,"%016llX",titleID);
 
     std::map<std::string,std::string> modTitlePath;
 
@@ -40,7 +41,7 @@ void HandleMultiModPacks() {
         if(curFile.compare(".") == 0 || curFile.compare("..") == 0)
             continue;
 
-        if(curFile.compare("content") == 0 || curFile.compare("aoc") == 0) {
+        if(curFile.compare(CONTENT_FOLDER) == 0 || curFile.compare(AOC_FOLDER) == 0/* || curFile.compare(META_FOLDER) == 0*/) {
             std::string packageName = std::string(NAME_PREFIX_SD) + " " + DEFAULT_NAME_PACKAGE;
             modTitlePath[packageName] = modTitleIDPathSD;
         }else{
@@ -54,7 +55,7 @@ void HandleMultiModPacks() {
         if(curFile.compare(".") == 0 || curFile.compare("..") == 0)
             continue;
 
-        if(curFile.compare("content") == 0 || curFile.compare("aoc") == 0) {
+        if(curFile.compare(CONTENT_FOLDER) == 0 || curFile.compare(AOC_FOLDER) == 0/* || curFile.compare(META_FOLDER) == 0*/) {
             std::string packageName = std::string(NAME_PREFIX_USB) + " " + DEFAULT_NAME_PACKAGE;
             modTitlePath[packageName] = modTitleIDPathUSB;
         }else{
@@ -65,7 +66,7 @@ void HandleMultiModPacks() {
     int modPackListSize =modTitlePath.size();
 
     if(modPackListSize == 0) return;
-    if(modPackListSize == 1){
+    if(modPackListSize == 1/* || !showMenu*/){
         for (std::map<std::string,std::string>::iterator it=modTitlePath.begin(); it!=modTitlePath.end(); ++it){
             snprintf(gModFolder, FS_MAX_ENTNAME_SIZE, "%s", it->second.c_str());
             break;

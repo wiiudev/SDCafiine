@@ -77,7 +77,7 @@ extern "C" int Menu_Main(void)
         return EXIT_SUCCESS;
     }
 
-    HandleMultiModPacks();
+    HandleMultiModPacks(OSGetTitleID());
 
     //!*******************************************************************
     //!                        Patching functions                        *
