@@ -14,7 +14,8 @@ int Menu_Main(void);
 void deInit(void);
 void ApplyPatches(void);
 void RestorePatches();
-void Init_SD(void);
+void Init_SD_USB(void);
+void deInit_SD_USB(void);
 
 s32 isInMiiMakerHBL();
 

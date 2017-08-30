@@ -8,7 +8,7 @@ extern "C" {
 #include "utils/function_patcher.h"
 
 /* Forward declarations */
-#define DEBUG_LOG 1
+#define DEBUG_LOG 0
 
 extern hooks_magic_t method_hooks_fs[];
 extern u32 method_hooks_size_fs;

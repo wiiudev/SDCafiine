@@ -30,6 +30,7 @@
 #include "system/OSThread.h"
 #include "utils/mcpHook.h"
 #include "utils/mocha.h"
+#include "utils/StringTools.h"
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -37,8 +38,7 @@
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
 /* Entry point */
-extern "C" int Menu_Main(void)
-{
+extern "C" int Menu_Main(void){
     if(gAppStatus == 2){
         //"No, we don't want to patch stuff again.");
         return EXIT_RELAUNCH_ON_LOAD;
@@ -62,36 +62,37 @@ extern "C" int Menu_Main(void)
 
     gSDInitDone = 0;
 
-    FileReplacerUtils::getInstance()->StartAsyncThread();
-
-    log_printf("Mount SD partition\n");
-    Init_SD();
+    DEBUG_FUNCTION_LINE("Mount SD partition\n");
+    Init_SD_USB();
 
     SetupKernelCallback();
+    //!*******************************************************************
+    //!                        Patching functions                        *
+    //!*******************************************************************
+    DEBUG_FUNCTION_LINE("Patching functions\n");
+    ApplyPatches();
+
+    FileReplacerUtils::getInstance()->StartAsyncThread();
+
+    gLastMetaPath[0] = 0;
 
     //Reset everything when were going back to the Mii Maker
     if(!isFirstBoot && isInMiiMakerHBL()){
-        log_print("Returing to the Homebrew Launcher!\n");
+        DEBUG_FUNCTION_LINE("Returing to the Homebrew Launcher!\n");
         isFirstBoot = 0;
         deInit();
         return EXIT_SUCCESS;
     }
 
-    HandleMultiModPacks(OSGetTitleID());
-
-    //!*******************************************************************
-    //!                        Patching functions                        *
-    //!*******************************************************************
-    log_print("Patching functions\n");
-    ApplyPatches();
-
     if(!isInMiiMakerHBL()){ //Starting the application
+        HandleMultiModPacks(OSGetTitleID());
         return EXIT_RELAUNCH_ON_LOAD;
     }
 
     if(isFirstBoot){ // First boot back to SysMenu
-        log_printf("Loading the System Menu\n");
+        DEBUG_FUNCTION_LINE("Loading the System Menu\n");
         isFirstBoot = 0;
+        //OSForceFullRelaunch();
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
     }
@@ -121,23 +122,8 @@ void deInit(){
     FileReplacerUtils::getInstance()->StopAsyncThread();
     FileReplacerUtils::destroyInstance();
     log_deinit();
-    if(gUsingLibIOSUHAX != 0){
-        fatUnmount("sd");
-        fatUnmount("usb");
-        if(gUsingLibIOSUHAX == 1){
-            log_printf("close IOSUHAX_Close\n");
-            IOSUHAX_Close();
-        }else{
-            log_printf("close MCPHookClose\n");
-            MCPHookClose();
-        }
-    }else{
-        unmount_sd_fat("sd");
-    }
-    unmount_fake();
-    deleteDevTabsNames();
 
-    gSDInitDone = 0;
+    deInit_SD_USB();
 }
 
 s32 isInMiiMakerHBL(){
@@ -152,40 +138,59 @@ s32 isInMiiMakerHBL(){
     return 0;
 }
 
-void Init_SD() {
-    log_printf("Mount fake\n");
-    mount_fake();
+void Init_SD_USB() {
     int res = IOSUHAX_Open(NULL);
     if(res < 0){
         ExecuteIOSExploitWithDefaultConfig();
         return;
     }
-    /*if(res < 0){ This is the haxchi work around. But it breaks disc reading. so well.. mocha 1, haxchi 0.
-        res = MCPHookOpen();
-        gUsingLibIOSUHAX = 2;
-    }*/
+    deleteDevTabsNames();
+    mount_fake();
+    gSDInitDone |= SDUSB_MOUNTED_FAKE;
+
     if(res < 0){
-        gUsingLibIOSUHAX = 0;
-        log_printf("IOSUHAX_open failed\n");
+        DEBUG_FUNCTION_LINE("IOSUHAX_open failed\n");
         if((res = mount_sd_fat("sd")) >= 0){
-            log_printf("mount_sd_fat success\n");
-            gSDInitDone = 1;
+            DEBUG_FUNCTION_LINE("mount_sd_fat success\n");
+            gSDInitDone |= SDUSB_MOUNTED_OS_SD;
         }else{
-            log_printf("mount_sd_fat failed %d\n",res);
+            DEBUG_FUNCTION_LINE("mount_sd_fat failed %d\n",res);
         }
     }else{
-        if(gUsingLibIOSUHAX != 2){
-            log_printf("Using IOSUHAX for (some) sd access\n");
-            gUsingLibIOSUHAX = 1;
-        }else{
-            log_printf("Using IOSUHAX (MCPHOOK) for (some) sd access\n");
-        }
-
+        DEBUG_FUNCTION_LINE("Using IOSUHAX for SD/USB access\n");
         if((res = fatInitDefault()) >= 0){
-            log_printf("fatInitDefault success\n");
-            gSDInitDone = 1;
+            DEBUG_FUNCTION_LINE("fatInitDefault success\n");
+            gSDInitDone |= SDUSB_MOUNTED_LIBIOSUHAX;
         }else{
-            log_printf("fatInitDefault failed %d\n",res);
+            DEBUG_FUNCTION_LINE("fatInitDefault failed %d\n",res);
         }
     }
+    DEBUG_FUNCTION_LINE("%08X\n",gSDInitDone);
+}
+
+void deInit_SD_USB(){
+    DEBUG_FUNCTION_LINE("Called this function.\n");
+    if(gSDInitDone & SDUSB_MOUNTED_FAKE){
+       DEBUG_FUNCTION_LINE("Unmounting fake\n");
+       unmount_fake();
+       gSDInitDone &= ~SDUSB_MOUNTED_FAKE;
+    }
+    if(gSDInitDone & SDUSB_MOUNTED_OS_SD){
+        DEBUG_FUNCTION_LINE("Unmounting OS SD\n");
+        unmount_sd_fat("sd");
+        gSDInitDone &= ~SDUSB_MOUNTED_OS_SD;
+    }
+    if(gSDInitDone & SDUSB_MOUNTED_LIBIOSUHAX){
+        DEBUG_FUNCTION_LINE("Unmounting libiosuhax SD and USB\n");
+        fatUnmount("sd");
+        fatUnmount("usb");
+        DEBUG_FUNCTION_LINE("Calling IOSUHAX_Close\n");
+        IOSUHAX_Close();
+        gSDInitDone &= ~SDUSB_MOUNTED_LIBIOSUHAX;
+    }
+    deleteDevTabsNames();
+    if(gSDInitDone != SDUSB_MOUNTED_NONE){
+        DEBUG_FUNCTION_LINE("WARNING. Some devices are still mounted.\n");
+    }
+    DEBUG_FUNCTION_LINE("Function end.\n");
 }
