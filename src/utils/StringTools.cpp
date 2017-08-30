@@ -169,6 +169,20 @@ int strtokcmp(const char * string, const char * compare, const char * separator)
 	return -1;
 }
 
+bool startsWith(const char *pre, const char *str){
+    size_t lenpre = strlen(pre),
+           lenstr = strlen(str);
+    return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
+
+bool endsWith(char const * str, char const * suffix, int lenstr, int lensuf){
+    if( ! str && ! suffix ) return 1;
+    if( ! str || ! suffix ) return 0;
+    if( lenstr < 0 ) lenstr = strlen(str);
+    if( lensuf < 0 ) lensuf = strlen(suffix);
+    return strcmp(str + lenstr - lensuf, suffix) == 0;
+}
+
 int strextcmp(const char * string, const char * extension, char seperator)
 {
 	if(!string || !extension)

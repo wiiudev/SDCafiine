@@ -36,6 +36,8 @@ int strprintf(std::string &str, const char * format, ...);
 std::string strfmt(const char * format, ...);
 bool char2wchar_t(const char * src, wchar_t * dest);
 int strtokcmp(const char * string, const char * compare, const char * separator);
+bool startsWith(const char *pre, const char *str);
+bool endsWith(char const * str, char const * suffix, int lenstr, int lensuf);
 int strextcmp(const char * string, const char * extension, char seperator);
 
 inline const char * FullpathToFilename(const char *path)
