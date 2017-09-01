@@ -209,8 +209,9 @@ char * getPathWithNewBase(const char * inPath, const char * newBase){
     char * relativePath = getRelativePath(inPath);
     char * result = NULL;
 
-    /*
+
     if(relativePath == NULL){
+        /*
         if(strlen(gModFolder) > 0){
             int file = 0;
             if(endsWith(inPath,BOOT_TV_TEX_TGA,-1,-1)){ file = 1;}
@@ -227,10 +228,10 @@ char * getPathWithNewBase(const char * inPath, const char * newBase){
             if(file == 2){sprintf(result,"%s/%s/%s",newBase,META_FOLDER,BOOT_DRC_TEX_TGA);}
             if(file == 3){sprintf(result,"%s/%s/%s",newBase,META_FOLDER,BOOT_SOUND_BTSND);}
             return result;
-        }
+        }*/
 
         return NULL;
-    }*/
+    }
 
     result = (char*)malloc((sizeof(char) * (strlen(newBase) +1+ strlen(relativePath))) + 1);
     if(result == NULL){

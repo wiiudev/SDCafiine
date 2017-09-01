@@ -8,7 +8,6 @@
 #include "../main.h"
 #include "dynamic_libs/fs_defs.h"
 #include "fs_function_patcher.h"
-#include "fs_function_utils.h"
 #include "../modpackSelector.h"
 
 #include <fat.h>
