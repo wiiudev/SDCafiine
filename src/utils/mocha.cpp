@@ -19,8 +19,8 @@ https://raw.githubusercontent.com/dimok789/mocha/
 #define ARM_CODE_BASE       0x08135000
 #define REPLACE_SYSCALL     0x081298BC
 
-extern const u8 launch_image_tga[];
-extern const u32 launch_image_tga_size;
+//extern const u8 launch_image_tga[];
+//extern const u32 launch_image_tga_size;
 
 static void uhs_exploit_init(int uhs_handle, cfw_config_t * config);
 static int uhs_write32(int uhs_handle, int arm_addr, int val);
@@ -347,8 +347,7 @@ static void uhs_exploit_init(int dev_uhs_0_handle, cfw_config_t * config)
     memcpy(payloads->data, ios_mcp_bin, payloads->size);
     payloads = (payload_info_t*)( ((char*)payloads) + ALIGN4(sizeof(payload_info_t) + payloads->size) );
 
-    if(config->launchImage)
-    {
+    /*if(config->launchImage){
         FILE *pFile = fopen(APP_PATH "/launch_image.tga", "rb");
         if(pFile)
         {
@@ -365,7 +364,7 @@ static void uhs_exploit_init(int dev_uhs_0_handle, cfw_config_t * config)
             memcpy(payloads->data, launch_image_tga, payloads->size);
             payloads = (payload_info_t*)( ((char*)payloads) + ALIGN4(sizeof(payload_info_t) + payloads->size) );
         }
-    }
+    }*/
     pretend_root_hub[33] = 0x500000;
     pretend_root_hub[78] = 0;
 

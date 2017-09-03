@@ -40,7 +40,7 @@ SOURCES		:=	src \
 				src/system \
 				src/utils \
 
-DATA		:=	src/mocha/data
+DATA		:=	
 
 INCLUDES	:=  src
 
