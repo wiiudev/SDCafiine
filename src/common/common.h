@@ -34,7 +34,10 @@ extern "C" {
 #define SDUSB_MOUNTED_NONE          0
 #define SDUSB_MOUNTED_FAKE          (1<<0)
 #define SDUSB_MOUNTED_OS_SD         (1<<1)
-#define SDUSB_MOUNTED_LIBIOSUHAX    (1<<2)
+#define SDUSB_LIBIOSU_LOADED        (1<<2)
+#define SD_MOUNTED_LIBFAT           (1<<3)
+#define USB_MOUNTED_LIBFAT          (1<<4)
+#define USB_MOUNTED_LIBNTFS         (1<<5)
 
 #define FILELIST_NAME               "filelist.txt"
 #define DIR_IDENTIFY                "?"  /* maximum length = 1*/

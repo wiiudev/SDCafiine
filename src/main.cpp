@@ -7,10 +7,7 @@
 #include "main.h"
 #include "modpackSelector.h"
 #include "common/common.h"
-#include <fat.h>
 #include <iosuhax.h>
-#include <iosuhax_devoptab.h>
-#include <iosuhax_disc_interface.h>
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/vpad_functions.h"
 #include "dynamic_libs/socket_functions.h"
@@ -30,6 +27,8 @@
 #include "system/OSThread.h"
 #include "utils/mcpHook.h"
 #include "utils/mocha.h"
+#include "utils/libfat.h"
+#include "utils/libntfs.h"
 #include "utils/StringTools.h"
 
 #include <sys/types.h>
@@ -92,7 +91,6 @@ extern "C" int Menu_Main(void){
     if(isFirstBoot){ // First boot back to SysMenu
         DEBUG_FUNCTION_LINE("Loading the System Menu\n");
         isFirstBoot = 0;
-        //OSForceFullRelaunch();
         SYSLaunchMenu();
         return EXIT_RELAUNCH_ON_LOAD;
     }
@@ -158,11 +156,15 @@ void Init_SD_USB() {
         }
     }else{
         DEBUG_FUNCTION_LINE("Using IOSUHAX for SD/USB access\n");
-        if((res = fatInitDefault()) >= 0){
-            DEBUG_FUNCTION_LINE("fatInitDefault success\n");
-            gSDInitDone |= SDUSB_MOUNTED_LIBIOSUHAX;
-        }else{
-            DEBUG_FUNCTION_LINE("fatInitDefault failed %d\n",res);
+        gSDInitDone |= SDUSB_LIBIOSU_LOADED;
+        int ntfs_mounts = mountAllNTFS();
+        if(ntfs_mounts > 0){
+            gSDInitDone |= USB_MOUNTED_LIBNTFS;
+        }
+
+        if(mount_libfatAll() == 0){
+            gSDInitDone |= SD_MOUNTED_LIBFAT;
+            gSDInitDone |= USB_MOUNTED_LIBFAT;
         }
     }
     DEBUG_FUNCTION_LINE("%08X\n",gSDInitDone);
@@ -170,6 +172,7 @@ void Init_SD_USB() {
 
 void deInit_SD_USB(){
     DEBUG_FUNCTION_LINE("Called this function.\n");
+
     if(gSDInitDone & SDUSB_MOUNTED_FAKE){
        DEBUG_FUNCTION_LINE("Unmounting fake\n");
        unmount_fake();
@@ -180,13 +183,30 @@ void deInit_SD_USB(){
         unmount_sd_fat("sd");
         gSDInitDone &= ~SDUSB_MOUNTED_OS_SD;
     }
-    if(gSDInitDone & SDUSB_MOUNTED_LIBIOSUHAX){
-        DEBUG_FUNCTION_LINE("Unmounting libiosuhax SD and USB\n");
-        fatUnmount("sd");
-        fatUnmount("usb");
+
+    if(gSDInitDone & SD_MOUNTED_LIBFAT){
+        DEBUG_FUNCTION_LINE("Unmounting LIBFAT SD\n");
+        unmount_libfat("sd");
+        gSDInitDone &= ~SD_MOUNTED_LIBFAT;
+    }
+
+    if(gSDInitDone & USB_MOUNTED_LIBFAT){
+        DEBUG_FUNCTION_LINE("Unmounting LIBFAT USB\n");
+        unmount_libfat("usb");
+        gSDInitDone &= ~USB_MOUNTED_LIBFAT;
+    }
+
+    if(gSDInitDone & USB_MOUNTED_LIBNTFS){
+        DEBUG_FUNCTION_LINE("Unmounting LIBNTFS USB\n");
+        unmountAllNTFS();
+        gSDInitDone &= ~USB_MOUNTED_LIBNTFS;
+    }
+
+    if(gSDInitDone & SDUSB_LIBIOSU_LOADED){
         DEBUG_FUNCTION_LINE("Calling IOSUHAX_Close\n");
         IOSUHAX_Close();
-        gSDInitDone &= ~SDUSB_MOUNTED_LIBIOSUHAX;
+        gSDInitDone &= ~SDUSB_LIBIOSU_LOADED;
+
     }
     deleteDevTabsNames();
     if(gSDInitDone != SDUSB_MOUNTED_NONE){

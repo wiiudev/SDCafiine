@@ -205,10 +205,9 @@ int is_gamefile(const char *path) {
     return 0;
 }
 char * getPathWithNewBase(const char * inPath, const char * newBase){
-    if(inPath == NULL || newBase == NULL || !(strlen(newBase) > 0)) return NULL;
+    if(inPath == NULL || *inPath == 0 || newBase == NULL || *newBase == 0) return NULL;
     char * relativePath = getRelativePath(inPath);
     char * result = NULL;
-
 
     if(relativePath == NULL){
         /*

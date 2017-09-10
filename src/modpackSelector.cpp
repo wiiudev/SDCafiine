@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <ntfs.h>
 #include <malloc.h>
 #include "modpackSelector.h"
 #include "common/common.h"
@@ -12,6 +13,7 @@
 #include "dynamic_libs/os_functions.h"
 #include "dynamic_libs/vpad_functions.h"
 #include "utils/logger.h"
+#include "utils/StringTools.h"
 #include "fs/fs_utils.h"
 #include "fs/CFile.hpp"
 #include "fs/DirList.h"
@@ -27,42 +29,46 @@ void HandleMultiModPacks(u64 titleID/*,bool showMenu*/) {
 
     std::map<std::string,std::string> modTitlePath;
 
-    std::string modTitleIDPathSD = std::string(SD_PATH) + GAME_MOD_FOLDER + "/" + TitleIDString;
-    std::string modTitleIDPathUSB = std::string(USB_PATH) + GAME_MOD_FOLDER + "/" + TitleIDString;
+    std::map<std::string,std::string> mounting_points;
+    if(gSDInitDone & SD_MOUNTED_LIBFAT){ mounting_points[std::string(SD_PATH)] = std::string(NAME_PREFIX_SD); }
+    if(gSDInitDone & USB_MOUNTED_LIBFAT){ mounting_points[std::string(USB_PATH)] = std::string(NAME_PREFIX_USB); }
+    int i = 0;
 
-    DirList modTitleDirListSD(modTitleIDPathSD.c_str(), NULL, DirList::Dirs);
-    DirList modTitleDirListUSB(modTitleIDPathUSB.c_str(), NULL, DirList::Dirs);
+    for (i = 0; i < ntfs_mount_count; i++){
+        mounting_points[std::string(((ntfs_md *)ntfs_mounts)[i].name) + ":"] = strfmt("%s:(%s)",((ntfs_md *)ntfs_mounts)[i].name, ntfsGetVolumeName(((ntfs_md *)ntfs_mounts)[i].name));
+    }
 
-    modTitleDirListSD.SortList();
-    modTitleDirListUSB.SortList();
+   for (std::map<std::string,std::string>::iterator it=mounting_points.begin(); it!=mounting_points.end(); ++it){
 
-    for(int i = 0; i < modTitleDirListSD.GetFilecount(); i++) {
-        std::string curFile = modTitleDirListSD.GetFilename(i);
-        if(curFile.compare(".") == 0 || curFile.compare("..") == 0)
-            continue;
+        std::string curMount = it->first;
+        std::string curMountName = it->second;
+        //DEBUG_FUNCTION_LINE("%s %s \n",curMount.c_str(),curMountName.c_str());
+        std::string modTitleIDPath = curMount + GAME_MOD_FOLDER + "/" + TitleIDString;
+        //DEBUG_FUNCTION_LINE("modTitleIDPath %s \n",modTitleIDPath.c_str());
+        DirList modTitleDirList(modTitleIDPath.c_str(), NULL, DirList::Dirs);
 
-        if(curFile.compare(CONTENT_FOLDER) == 0 || curFile.compare(AOC_FOLDER) == 0/* || curFile.compare(META_FOLDER) == 0*/) {
-            std::string packageName = std::string(NAME_PREFIX_SD) + " " + DEFAULT_NAME_PACKAGE;
-            modTitlePath[packageName] = modTitleIDPathSD;
-        }else{
-            std::string packageName = std::string(NAME_PREFIX_SD) + " " + curFile;
-            modTitlePath[packageName] = modTitleIDPathSD + "/" + curFile;
+        modTitleDirList.SortList();
+
+        for(int i = 0; i < modTitleDirList.GetFilecount(); i++) {
+            std::string curFile = modTitleDirList.GetFilename(i);
+            //DEBUG_FUNCTION_LINE("curFile %s \n",curFile.c_str());
+            if(curFile.compare(".") == 0 || curFile.compare("..") == 0)
+                continue;
+
+            if(curFile.compare(CONTENT_FOLDER) == 0 || curFile.compare(AOC_FOLDER) == 0/* || curFile.compare(META_FOLDER) == 0*/) {
+                std::string packageName = curMountName + " " + DEFAULT_NAME_PACKAGE;
+                modTitlePath[packageName] = modTitleIDPath;
+                DEBUG_FUNCTION_LINE("found %s \n",packageName.c_str());
+            }else{
+                std::string packageName = curMountName + " " + curFile;
+                modTitlePath[packageName] = modTitleIDPath + "/" + curFile;
+                DEBUG_FUNCTION_LINE("found %s \n",packageName.c_str());
+            }
         }
     }
 
-    for(int i = 0; i < modTitleDirListUSB.GetFilecount(); i++) {
-        std::string curFile = modTitleDirListUSB.GetFilename(i);
-        if(curFile.compare(".") == 0 || curFile.compare("..") == 0)
-            continue;
+    //DEBUG_FUNCTION_LINE("Iteration done\n");
 
-        if(curFile.compare(CONTENT_FOLDER) == 0 || curFile.compare(AOC_FOLDER) == 0/* || curFile.compare(META_FOLDER) == 0*/) {
-            std::string packageName = std::string(NAME_PREFIX_USB) + " " + DEFAULT_NAME_PACKAGE;
-            modTitlePath[packageName] = modTitleIDPathUSB;
-        }else{
-            std::string packageName = std::string(NAME_PREFIX_USB) + " " + curFile;
-            modTitlePath[packageName] = modTitleIDPathUSB + "/" + curFile;
-        }
-    }
     int modPackListSize =modTitlePath.size();
 
     if(modPackListSize == 0) return;

@@ -15,3 +15,5 @@ FSAsyncResult gAsyncResultCache[ASYNC_RESULT_CACHE_SIZE] __attribute__((section(
 u8 gAsyncResultCacheLock __attribute__((section(".data"))) = 0;
 u8 gAsyncResultCacheCur __attribute__((section(".data"))) = 0;
 
+void * ntfs_mounts __attribute__((section(".data"))) = NULL;
+int ntfs_mount_count __attribute__((section(".data"))) = 0;

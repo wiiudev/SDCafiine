@@ -1,17 +1,17 @@
-# SDCafiine (HBL version)
+﻿# SDCafiine (HBL version)
 
 ## What is SDCafiine
 SDCafiine is a Homebrew Application for the Nintendo Wii U, that can be loaded with the [homebrew launcher](https://github.com/dimok789/homebrew_launcher). The main feature of this application is the **on-the-fly replacing of files**, which can be used used to loaded modified content from external media (**SD/USB**). It hooks into the file system functions of the WiiU. Whenever a file is accessed, SDCafiine checks if a (modified) version of it present on the SD/US device, and redirect the file operations if needed.
 
 # Which games are supported
 In the past SDCafiine only supported games which already had access to the SD Card (for example Super Smash Bros. for Wii U), but **since version 1.4 all games are supported**.
-To achieve this, SDCafiine has a built-in a version of [mocha](https://github.com/dimok789/mocha), which is a Custom Firmware with [libiosuhax](https://github.com/dimok789/libiosuhax) support. This allows support for any FAT32 device via [libfat](https://github.com/aliaspider/libfat). 
+To achieve this, SDCafiine has a built-in a version of [mocha](https://github.com/dimok789/mocha), which is a Custom Firmware with [libiosuhax](https://github.com/dimok789/libiosuhax) support. This allows support for FAT32 devices via [libfat](https://github.com/aliaspider/libfat) and support for NTFS devices via [libntfs](https://github.com/Maschell/libntfs-wiiu).
 
 # Features
 - On the fly file **replacing of game files**.
 - Support for **replacing files from downloadable content**
 - **Built in libiosuhax support** via mocha
-- Supports loading files from **SD and USB** (FAT32)
+- Supports loading files from **SD and USB** (FAT32 and NTFS)
 - Support for **multiple modpacks** for as single game.
 
 ## How to use it
@@ -30,7 +30,7 @@ When the files are on the SDCard, use your prefered method to get into the [home
 On success, the system menu should load. Now simply start any game and the mods should load.
 
 ### Installation of the mods
-Before the mods can be loaded, they need to be copied to a SD or USB device. Since version 1.4 also USB devices (FAT32 only) are supported via libfat.
+Before the mods can be loaded, they need to be copied to a SD or USB device. Since version 1.4 also USB devices (FAT32 and NTFS only) are supported via libfat/libntfs.
 **In the following "root:/" is corresponding to the root of your SD/USB device**. The basic filepath structure is this:
 
 ```
@@ -71,6 +71,7 @@ Make sure you download the complete repo, including the submodules:
 For building you need: 
 - [libfat](https://github.com/aliaspider/libfat/)
 - [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
+- [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
 
 *note: when you change something in the mocha folder, you need to use make clean before building.*
 
@@ -79,5 +80,6 @@ HBL support, code rewrite and further improvements - Maschell
 minor improvements - Zarklord 
 [inital SDCafiine creation](https://gbatemp.net/goto/post?id=5680630) - golden45  
 Cafiine creation - chadderz (and MrBean35000vr ?)  
-mocha - dimok789
+mocha,libiosuhax - dimok789
 libfat - devkitPro team
+libntfs - libntfs team

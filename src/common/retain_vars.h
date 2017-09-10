@@ -24,4 +24,7 @@ extern FSAsyncResult gAsyncResultCache[ASYNC_RESULT_CACHE_SIZE];
 extern u8 gAsyncResultCacheLock;
 extern u8 gAsyncResultCacheCur;
 
+extern void * ntfs_mounts;
+extern int ntfs_mount_count;
+
 #endif // RETAINS_VARS_H_

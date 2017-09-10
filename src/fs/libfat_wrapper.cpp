@@ -270,11 +270,11 @@ int libfat_FSGetStat(const char * path, FSStat * stats){
         return USE_OS_FS_FUNCTION;
     }
 
-    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("for path %s\n",path); }
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("for path \"%s\"\n",path); }
     int result = USE_OS_FS_FUNCTION;
     char * newPath = getPathWithNewBase(path,gModFolder);
     if(newPath != NULL){
-        DEBUG_FUNCTION_LINE("Searching for path %s\n",newPath);
+        DEBUG_FUNCTION_LINE("Searching for path \"%s\"\n",newPath);
         struct stat path_stat;
         if(stat(newPath, &path_stat) < 0){
             result = USE_OS_FS_FUNCTION;
