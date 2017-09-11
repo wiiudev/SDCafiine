@@ -16,7 +16,7 @@
 #include "patcher/fs_function_patcher.h"
 #include "utils/function_patcher.h"
 #include "kernel/kernel_functions.h"
-#include "utils/FileReplacerUtils.h"
+#include "fs_wrapper/FileReplacerUtils.h"
 #include "utils/logger.h"
 #include "fs/fs_utils.h"
 #include "fs/sd_fat_devoptab.h"

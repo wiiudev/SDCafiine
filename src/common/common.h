@@ -29,8 +29,6 @@ extern "C" {
 #define GAME_PATH_TYPE_CONTENT      1
 #define GAME_PATH_TYPE_AOC          2
 
-#define USE_OS_FS_FUNCTION          -1337
-
 #define SDUSB_MOUNTED_NONE          0
 #define SDUSB_MOUNTED_FAKE          (1<<0)
 #define SDUSB_MOUNTED_OS_SD         (1<<1)

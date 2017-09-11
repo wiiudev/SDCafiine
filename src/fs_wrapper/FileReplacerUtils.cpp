@@ -1,7 +1,35 @@
 #include <vector>
 #include "FileReplacerUtils.h"
 
+OSMessageQueue lfFSQueue __attribute__((section(".data")));
+OSMessage lfFSQueueMessages[FS_QUEUE_MESSAGE_COUNT] __attribute__((section(".data")));
+
+FSAsyncResult lfAsyncResultCache[ASYNC_RESULT_CACHE_SIZE] __attribute__((section(".data")));
+u8 lfAsyncResultCacheLock __attribute__((section(".data"))) = 0;
+u8 lfAsyncResultCacheCur __attribute__((section(".data"))) = 0;
+
 FileReplacerUtils *FileReplacerUtils::instance = NULL;
+
+int setErrorFlag(int error){
+    int result = error;
+    if(error == -1){
+        result = CHECKED_WITH_ALL_ERRORS;
+    }else{
+        result |= CHECKED_MASK;
+    }
+    return result;
+}
+
+int checkErrorFlag(int * error){
+    if(*error == CHECKED_WITH_ALL_ERRORS){
+        *error = -1;
+        return true;
+    }else if ((*error & CHECKED_MASK) == CHECKED_MASK){
+        *error &= ~CHECKED_MASK;
+        return true;
+    }
+    return false;
+}
 
 void FileReplacerUtils::StartAsyncThread(){
     s32 priority = 15;
@@ -22,12 +50,12 @@ void FileReplacerUtils::DoAsyncThreadInternal(){
     void (*callback)(CustomAsyncParam *);
     CustomAsyncParam cParam;
     while(true){
-        if(DEBUG_LOG){DEBUG_FUNCTION_LINE("Waiting for message\n");}
-        if(!OSReceiveMessage(&gFSQueue,&message,OS_MESSAGE_BLOCK)){
-            //os_usleep(1000*100);
+        if(FS_WRAPPER_DEBUG_LOG){DEBUG_FUNCTION_LINE("Waiting for message\n");}
+        if(!OSReceiveMessage(&fsFSQueue,&message,OS_MESSAGE_BLOCK)){
+            os_usleep(1000);
             continue;
         }
-        if(DEBUG_LOG){DEBUG_FUNCTION_LINE("Received message %08X\n",message.message);}
+        if(FS_WRAPPER_DEBUG_LOG){DEBUG_FUNCTION_LINE("Received message %08X\n",message.message);}
         if(message.message == 0xDEADBEEF){
             DEBUG_FUNCTION_LINE("We should stop the server\n");
             break;
@@ -37,36 +65,36 @@ void FileReplacerUtils::DoAsyncThreadInternal(){
         CustomAsyncParam * param = (CustomAsyncParam *)message.data0;
         memcpy(&cParam,param,sizeof(CustomAsyncParam));
         free(param);
-        if(DEBUG_LOG){DEBUG_FUNCTION_LINE("Calling callback at %08X, with %08X\n",callback,&cParam);}
+        if(FS_WRAPPER_DEBUG_LOG){DEBUG_FUNCTION_LINE("Calling callback at %08X, with %08X\n",callback,&cParam);}
         callback(&cParam);
     }
     serverHasStopped = 1;
 }
 
 FSAsyncResult * FileReplacerUtils::getNewAsyncParamPointer(){
-    while(gAsyncResultCacheLock){
+    while(fsAsyncResultCacheLock){
         os_usleep(100);
     }
-    gAsyncResultCacheLock = 1;
+    fsAsyncResultCacheLock = 1;
 
-    if(gAsyncResultCacheCur >= ASYNC_RESULT_CACHE_SIZE){
-        gAsyncResultCacheCur = 0;
+    if(fsAsyncResultCacheCur >= ASYNC_RESULT_CACHE_SIZE){
+        fsAsyncResultCacheCur = 0;
     }
 
-    FSAsyncResult *result = &gAsyncResultCache[gAsyncResultCacheCur++];
+    FSAsyncResult *result = &fsAsyncResultCache[fsAsyncResultCacheCur++];
 
-    gAsyncResultCacheLock = 0;
+    fsAsyncResultCacheLock = 0;
     return result;
 }
 
 void FileReplacerUtils::sendAsyncCommand(FSClient * client, FSCmdBlock * cmd,FSAsyncParams* asyncParams,int status){
     if(asyncParams != NULL){
         if(asyncParams->userCallback != NULL){ //Using the userCallback
-            if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("userCallback %08X userContext %08X\n",asyncParams->userCallback,asyncParams->userContext); }
+            if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("userCallback %08X userContext %08X\n",asyncParams->userCallback,asyncParams->userContext); }
             asyncParams->userCallback(client,cmd,status,asyncParams->userContext);
             return;
         }else{
-            if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("asyncParams->ioMsgQueue %08X \n",asyncParams->ioMsgQueue); }
+            if(FS_WRAPPER_DEBUG_LOG){ DEBUG_FUNCTION_LINE("asyncParams->ioMsgQueue %08X \n",asyncParams->ioMsgQueue); }
             FSAsyncResult * result = FileReplacerUtils::getNewAsyncParamPointer();
             FSMessage message;
             result->userParams.userCallback = asyncParams->userCallback;

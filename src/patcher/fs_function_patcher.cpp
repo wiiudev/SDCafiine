@@ -15,13 +15,15 @@
 #include <iosuhax_devoptab.h>
 #include <iosuhax_disc_interface.h>
 #include "utils/logger.h"
-#include "utils/FileReplacerUtils.h"
+#include "fs_wrapper/FileReplacerUtils.h"
 #include "common/retain_vars.h"
 #include "system/exception_handler.h"
 #include "utils/StringTools.h"
 #include "utils/mcpHook.h"
+#include "fs/fs_utils.h"
 #include "fs/sd_fat_devoptab.h"
-#include "fs/libfat_wrapper.h"
+#include "fs_wrapper/fs_sync_wrapper.h"
+#include "fs_wrapper/fs_os_async_wrapper.h"
 
 void deInitApplication(){
     FileReplacerUtils::getInstance()->StopAsyncThread();
@@ -47,43 +49,6 @@ DECL(u32, ProcUIProcessMessages, u32 u){
     return res;
 }
 
-#define CHECKED_WITH_ALL_ERRORS     0x10000
-#define CHECKED_MASK                0x01000
-
-/**
-Returns a modified error flag.
-This will be used to save the information if a file/handle was already
-tried to be patched.
-The non-async function internally call the async functions, and this way
-we avoid testing it twice.
-If the result contains our mask, we just straight to the OS functions.
-**/
-int setErrorFlag(int error){
-    int result = error;
-    if(error == -1){
-        result = CHECKED_WITH_ALL_ERRORS;
-    }else{
-        result |= CHECKED_MASK;
-    }
-    return result;
-}
-
-/**
-Check if we already checked the file/handle.
-Returns true if it was already checked (+ revert the error)
-Return false if it should be (tried) to be patched.
-**/
-int checkErrorFlag(int * error){
-    if(*error == CHECKED_WITH_ALL_ERRORS){
-        *error = -1;
-        return true;
-    }else if ((*error & CHECKED_MASK) == CHECKED_MASK){
-        *error &= ~CHECKED_MASK;
-        return true;
-    }
-    return false;
-}
-
 /**
 In theory it would be enough just to patch the "Async" versions of the function.
 The non-async functions internally use the async function anyway.
@@ -94,7 +59,7 @@ DECL(int, FSCloseFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSCloseFile(pClient, pCmd, fd, error); }
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSCloseFile(fd)) != USE_OS_FS_FUNCTION){
+    if((result = fs_wrapper_FSCloseFile(fd)) != USE_OS_FS_FUNCTION){
         return result;
     }
 
@@ -106,14 +71,14 @@ DECL(int, FSCloseFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, int err
         return real_FSCloseFileAsync(pClient, pCmd, fd, error, asyncParams);
     }
 
-    return libfat_FSCloseFileAsync(pClient, pCmd, fd, error, asyncParams,(void*)real_FSCloseFileAsync);
+    return fs_os_wrapper_FSCloseFileAsync(pClient, pCmd, fd, error, asyncParams,(void*)real_FSCloseFileAsync);
 }
 
 DECL(int, FSGetPosFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, int *pos, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSGetPosFile(pClient, pCmd, fd, pos, error); }
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSGetPosFile(fd,pos)) != USE_OS_FS_FUNCTION){
+    if((result = fs_wrapper_FSGetPosFile(fd,pos)) != USE_OS_FS_FUNCTION){
         return result;
     }
 
@@ -125,15 +90,22 @@ DECL(int, FSGetPosFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, int *p
         return real_FSGetPosFileAsync(pClient, pCmd, fd, pos, error, asyncParams);
     }
 
-	return libfat_FSGetPosFileAsync(pClient, pCmd, fd, pos, error, asyncParams,(void*) real_FSGetPosFileAsync);
+	return fs_os_wrapper_FSGetPosFileAsync(pClient, pCmd, fd, pos, error, asyncParams,(void*) real_FSGetPosFileAsync);
 }
 
 DECL(int, FSGetStat, FSClient *pClient, FSCmdBlock *pCmd, const char *path, FSStat *stats, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSGetStat(pClient, pCmd, path, stats, error); }
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSGetStat(path,stats)) != USE_OS_FS_FUNCTION){
-        return result;
+
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("for path %s\n",path); }
+    char * newPath = getPathWithNewBase(path,gModFolder);
+    if(newPath != NULL){
+        if((result = fs_wrapper_FSGetStat(path,stats)) != USE_OS_FS_FUNCTION){
+            if(newPath){ free(newPath); newPath = NULL;}
+            return result;
+        }
+        if(newPath){ free(newPath); newPath = NULL;} //Should be dead code...
     }
 
     return real_FSGetStat(pClient, pCmd, path, stats, setErrorFlag(error));
@@ -144,14 +116,14 @@ DECL(int, FSGetStatAsync, FSClient *pClient, FSCmdBlock *pCmd, const char *path,
         return real_FSGetStatAsync(pClient, pCmd, path, stats, error, asyncParams);
     }
 
-    return libfat_FSGetStatAsync(pClient, pCmd, path, stats, error, asyncParams,(void*) real_FSGetStatAsync);
+    return fs_os_wrapper_FSGetStatAsync(pClient, pCmd, path, stats, error, asyncParams,(void*) real_FSGetStatAsync);
 }
 
 DECL(int, FSGetStatFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, FSStat * stats, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSGetStatFile(pClient, pCmd, fd, stats, error); }
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSGetStatFile(fd,stats)) != USE_OS_FS_FUNCTION){
+    if((result = fs_wrapper_FSGetStatFile(fd,stats)) != USE_OS_FS_FUNCTION){
         return result;
     }
 
@@ -163,13 +135,13 @@ DECL(int, FSGetStatFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, FSSta
         return real_FSGetStatFileAsync(pClient, pCmd, fd, stats, error, asyncParams);
     }
 
-	return libfat_FSGetStatFileAsync(pClient, pCmd, fd, stats, error, asyncParams,(void *) real_FSGetStatFileAsync);
+	return fs_os_wrapper_FSGetStatFileAsync(pClient, pCmd, fd, stats, error, asyncParams,(void *) real_FSGetStatFileAsync);
 }
 DECL(int, FSIsEof, FSClient *pClient, FSCmdBlock *pCmd, int fd, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE) return real_FSIsEof(pClient, pCmd, fd, error);
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSIsEof(fd)) != USE_OS_FS_FUNCTION){
+    if((result = fs_wrapper_FSIsEof(fd)) != USE_OS_FS_FUNCTION){
         return result;
     }
 
@@ -181,7 +153,7 @@ DECL(int, FSIsEofAsync, FSClient *pClient, FSCmdBlock *pCmd, int fd, int error, 
         return real_FSIsEofAsync(pClient, pCmd, fd, error,asyncParams);
     }
 
-	return libfat_FSIsEofAsync(pClient, pCmd, fd, error, asyncParams, (void *) real_FSIsEofAsync);
+	return fs_os_wrapper_FSIsEofAsync(pClient, pCmd, fd, error, asyncParams, (void *) real_FSIsEofAsync);
 }
 
 u64 getTitleIDFromPath(const char * path){
@@ -217,9 +189,16 @@ DECL(int, FSOpenFile, FSClient *pClient, FSCmdBlock *pCmd, const char *path, con
         }
     }*/
 
+    if(DEBUG_LOG){ DEBUG_FUNCTION_LINE("for path %s\n",path); }
+    char * newPath = getPathWithNewBase(path,gModFolder);
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSOpenFile(path,mode,handle)) != USE_OS_FS_FUNCTION){
+
+    if(newPath != NULL){
+        if((result = fs_wrapper_FSOpenFile(path,mode,handle)) != USE_OS_FS_FUNCTION){
+        if(newPath){ free(newPath); newPath = NULL;}
         return result;
+        }
+        if(newPath){ free(newPath); newPath = NULL;} //Should be dead code...
     }
 
     return real_FSOpenFile(pClient, pCmd, path, mode, handle, setErrorFlag(error));
@@ -230,13 +209,13 @@ DECL(int, FSOpenFileAsync, FSClient *pClient, FSCmdBlock *pCmd, const char *path
         return real_FSOpenFileAsync(pClient, pCmd, path, mode, handle,error, asyncParams);
     }
 
-    return libfat_FSOpenFileAsync(pClient, pCmd, path, mode, handle,error,asyncParams,(void*)real_FSOpenFileAsync);
+    return fs_os_wrapper_FSOpenFileAsync(pClient, pCmd, path, mode, handle,error,asyncParams,(void*)real_FSOpenFileAsync);
 }
 DECL(int, FSReadFile, FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, int handle, int flag, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSReadFile(pClient, pCmd, buffer, size, count, handle, flag, error); }
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSReadFile(handle,buffer,size,count)) != USE_OS_FS_FUNCTION){
+    if((result = fs_wrapper_FSReadFile(handle,buffer,size,count)) != USE_OS_FS_FUNCTION){
         return result;
     }
 
@@ -248,14 +227,14 @@ DECL(int, FSReadFileAsync, FSClient *pClient, FSCmdBlock *pCmd, void *buffer, in
         return real_FSReadFileAsync(pClient, pCmd, buffer, size, count, fd, flag, error, asyncParams);
     }
 
-    return libfat_FSReadFileAsync(pClient, pCmd, buffer, size, count, fd, flag, error, asyncParams, (void*)real_FSReadFileAsync);
+    return fs_os_wrapper_FSReadFileAsync(pClient, pCmd, buffer, size, count, fd, flag, error, asyncParams, (void*)real_FSReadFileAsync);
 }
 
 DECL(int, FSReadFileWithPos, FSClient *pClient, FSCmdBlock *pCmd, void *buffer, int size, int count, u32 pos, int fd, int flag, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE){ return real_FSReadFileWithPos(pClient, pCmd, buffer, size, count, pos, fd, flag, error); }
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSReadFileWithPos(buffer,size,count,pos,fd)) != USE_OS_FS_FUNCTION){
+    if((result = fs_wrapper_FSReadFileWithPos(buffer,size,count,pos,fd)) != USE_OS_FS_FUNCTION){
         return result;
     }
 
@@ -267,14 +246,14 @@ DECL(int, FSReadFileWithPosAsync, FSClient *pClient, FSCmdBlock *pCmd, void *buf
         return real_FSReadFileWithPosAsync(pClient, pCmd, buffer, size, count, pos, fd, flag, error, asyncParams);
     }
 
-    return libfat_FSReadFileWithPosAsync(pClient, pCmd, buffer, size, count, pos, fd, flag, error, asyncParams, (void*)real_FSReadFileWithPosAsync);
+    return fs_os_wrapper_FSReadFileWithPosAsync(pClient, pCmd, buffer, size, count, pos, fd, flag, error, asyncParams, (void*)real_FSReadFileWithPosAsync);
 }
 
 DECL(int, FSSetPosFile, FSClient *pClient, FSCmdBlock *pCmd, int fd, u32 pos, int error) {
     if(gAppStatus == 2 || gSDInitDone <= SDUSB_MOUNTED_FAKE) return real_FSSetPosFile(pClient, pCmd, fd, pos, error);
 
     int result = USE_OS_FS_FUNCTION;
-    if((result = libfat_FSSetPosFile(fd,pos)) != USE_OS_FS_FUNCTION){
+    if((result = fs_wrapper_FSSetPosFile(fd,pos)) != USE_OS_FS_FUNCTION){
         return result;
     }
 
@@ -286,7 +265,7 @@ DECL(int, FSSetPosFileAsync, FSClient *pClient, FSCmdBlock *pCmd, int handle, u3
         return real_FSSetPosFileAsync(pClient, pCmd, handle, pos, error,asyncParams);
     }
 
-	return libfat_FSSetPosFileAsync(pClient, pCmd, handle, pos, error, asyncParams, (void*)real_FSSetPosFileAsync);
+	return fs_os_wrapper_FSSetPosFileAsync(pClient, pCmd, handle, pos, error, asyncParams, (void*)real_FSSetPosFileAsync);
 }
 
 /*

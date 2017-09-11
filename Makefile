@@ -37,6 +37,7 @@ SOURCES		:=	src \
 				src/patcher \
 				src/common \
 				src/fs \
+				src/fs_wrapper \
 				src/system \
 				src/utils \
 
