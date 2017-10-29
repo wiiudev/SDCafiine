@@ -11,6 +11,9 @@
 #include "common/retain_vars.h"
 
 int is_gamefile(const char *path) {
+    if(path == NULL) return 0;
+    if(strncmp(path,"CAFE/",5) == 0) return GAME_PATH_TYPE_STRIPPED_CONTENT;    //Workaround for NSMBU
+
     // In case the path starts by "//" and not "/" (some games do that ... ...)
     if (path[0] == '/' && path[1] == '/')
         path = &path[1];
@@ -126,6 +129,13 @@ char * getRelativePath(const char *path){
                 return NULL;
             }
             sprintf(pathForCheck,"%s/%s",AOC_FOLDER,pathForCheckInternal);
+        } else if (gameFile == GAME_PATH_TYPE_STRIPPED_CONTENT) { // is stripped content
+            pathForCheck = (char*)malloc(sizeof(CONTENT_FOLDER) + 1 + (sizeof(char) * (strlen(path) + 1)));
+            if(pathForCheck == NULL){
+                DEBUG_FUNCTION_LINE("malloc failed\n");
+                return NULL;
+            }
+            sprintf(pathForCheck,"%s/%s",CONTENT_FOLDER,path);
         }
     }
 

@@ -26,8 +26,9 @@ extern "C" {
 #define BOOT_DRC_TEX_TGA            "bootDrcTex.tga"
 #define BOOT_SOUND_BTSND            "bootSound.btsnd"
 
-#define GAME_PATH_TYPE_CONTENT      1
-#define GAME_PATH_TYPE_AOC          2
+#define GAME_PATH_TYPE_CONTENT              1
+#define GAME_PATH_TYPE_AOC                  2
+#define GAME_PATH_TYPE_STRIPPED_CONTENT     3
 
 #define SDUSB_MOUNTED_NONE          0
 #define SDUSB_MOUNTED_FAKE          (1<<0)

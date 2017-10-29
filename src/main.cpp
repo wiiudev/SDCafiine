@@ -118,7 +118,7 @@ void deInit(){
     RestorePatches();
     //FileReplacerUtils::getInstance()->StopAsyncThread();
     FileReplacerUtils::destroyInstance();
-    log_deinit();
+    //log_deinit();
 
     deInit_SD_USB();
 }
