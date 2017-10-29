@@ -1,4 +1,3 @@
-#include <gctypes.h>
 #include "retain_vars.h"
 
 u8 gUsingLibIOSUHAX __attribute__((section(".data"))) = 0;

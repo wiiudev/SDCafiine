@@ -5,8 +5,8 @@ https://raw.githubusercontent.com/dimok789/mocha/
 
 #include <string.h>
 #include <stdio.h>
-#include "dynamic_libs/os_functions.h"
-#include "utils/logger.h"
+#include <dynamic_libs/os_functions.h>
+#include <utils/logger.h>
 #include "mocha.h"
 
 #define ALIGN4(x)           (((x) + 3) & ~3)

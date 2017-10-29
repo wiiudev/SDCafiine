@@ -1,9 +1,7 @@
 #ifndef RETAINS_VARS_H_
 #define RETAINS_VARS_H_
-#include <gctypes.h>
-#include "patcher/fs_function_patcher.h"
-#include "dynamic_libs/fs_defs.h"
-#include "dynamic_libs/os_types.h"
+#include <dynamic_libs/fs_defs.h>
+#include <dynamic_libs/os_types.h>
 
 #define ASYNC_RESULT_CACHE_SIZE     50
 #define FS_QUEUE_MESSAGE_COUNT      5

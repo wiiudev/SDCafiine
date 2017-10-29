@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "utils/function_patcher.h"
+#include <utils/function_patcher.h>
 
 /* Forward declarations */
 #define DEBUG_LOG 0

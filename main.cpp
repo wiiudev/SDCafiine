@@ -33,6 +33,41 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+bool printdir(std::string path){
+    log_printf(       "open dir                         %s\n",path.c_str());
+    struct dirent *dirent = NULL;
+	DIR *dir_ = opendir(path.c_str());
+	if (dir_ == NULL){
+		return false;
+	}
+	while ((dirent = readdir(dir_)) != 0){
+		bool isDir = dirent->d_type & DT_DIR;
+		bool isFile = dirent->d_type & DT_REG;
+		const char *filename = dirent->d_name;
+
+		if(strcmp(filename,".") == 0 ||
+            strcmp(filename,"..") == 0){
+            continue;
+        }
+
+        std::string newPath = path + "/" + std::string(filename);
+
+        log_printf(    "flags             %08X path: %s\n",dirent->d_type,filename);
+        if(isDir){
+            printdir(newPath);
+        }else if(isFile){
+            int fd = open(newPath.c_str(),O_RDONLY);
+            log_printf("open file  fd:    %08X path: %s\n",fd,filename);
+            log_printf("close file result:%08X path: %s\n",close(fd),filename);
+        }else{
+            log_printf("unkown filetype %08X %s\n",dirent->d_type,filename);
+        }
+    }
+    log_printf(        "close dir                        %s\n",path.c_str());
+    //closedir(dir_);
+
+}
+
 u8 isFirstBoot __attribute__((section(".data"))) = 1;
 
 /* Entry point */
@@ -62,6 +97,48 @@ extern "C" int Menu_Main(void){
 
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
     Init_SD_USB();
+
+    //printdir("ntfs0:/sdcafiine");
+
+    /*
+
+    DEBUG_FUNCTION_LINE("test1 open\n");
+    FILE * file1 = fopen("ntfs0:/test1.txt","wb+");
+    DEBUG_FUNCTION_LINE("test2 open\n");
+    FILE * file2 = fopen("ntfs0:/test2.txt","wb+");
+    DEBUG_FUNCTION_LINE("test3 open\n");
+    FILE * file3 = fopen("ntfs0:/test3.txt","wb+");
+
+    if(file1 != NULL && file2 != NULL && file3 != NULL){
+        DEBUG_FUNCTION_LINE("Creating all file was successful\n");
+        void *  data = malloc(sizeof(char) * 0x8000*100);
+        memset(data,0x37,sizeof(char) * 0x8000*100);
+        DEBUG_FUNCTION_LINE("Write 2\n");
+        fwrite (data , 1, sizeof(char) * 0x8000*100, file2);
+        DEBUG_FUNCTION_LINE("Write 1\n");
+        fwrite (data , 1, sizeof(char) * 0x8000*100, file1);
+        DEBUG_FUNCTION_LINE("Write 2\n");
+        fwrite (data , 1, sizeof(char) * 0x8000*100, file2);
+        DEBUG_FUNCTION_LINE("Write 3\n");
+        fwrite (data , 1, sizeof(char) * 0x8000*100, file3);
+        DEBUG_FUNCTION_LINE("Write 2\n");
+        fwrite (data , 1, sizeof(char) * 0x8000*100, file2);
+        DEBUG_FUNCTION_LINE("Write 1\n");
+        fwrite (data , 1, sizeof(char) * 0x8000*100, file1);
+        DEBUG_FUNCTION_LINE("Write 1\n");
+        fwrite (data , 1, sizeof(char) * 0x8000*100, file1);
+
+        DEBUG_FUNCTION_LINE("test1 close\n");
+        fclose(file1);
+        DEBUG_FUNCTION_LINE("test2 close\n");
+        fclose(file2);
+        DEBUG_FUNCTION_LINE("test3 close\n");
+        fclose(file3);
+    }*/
+
+    //deInit();
+    //return EXIT_SUCCESS;
+
 
     SetupKernelCallback();
     //!*******************************************************************

@@ -10,13 +10,13 @@
 #include "modpackSelector.h"
 #include "common/common.h"
 
-#include "dynamic_libs/os_functions.h"
-#include "dynamic_libs/vpad_functions.h"
-#include "utils/logger.h"
-#include "utils/StringTools.h"
-#include "fs/fs_utils.h"
-#include "fs/CFile.hpp"
-#include "fs/DirList.h"
+#include <dynamic_libs/os_functions.h>
+#include <dynamic_libs/vpad_functions.h>
+#include <utils/logger.h>
+#include <utils/StringTools.h>
+#include <fs/FSUtils.h>
+#include <fs/CFile.hpp>
+#include <fs/DirList.h>
 #include "common/retain_vars.h"
 
 #define TEXT_SEL(x, text1, text2)           ((x) ? (text1) : (text2))
@@ -35,7 +35,7 @@ void HandleMultiModPacks(u64 titleID/*,bool showMenu*/) {
     int i = 0;
 
     for (i = 0; i < ntfs_mount_count; i++){
-        mounting_points[std::string(((ntfs_md *)ntfs_mounts)[i].name) + ":"] = strfmt("%s:(%s)",((ntfs_md *)ntfs_mounts)[i].name, ntfsGetVolumeName(((ntfs_md *)ntfs_mounts)[i].name));
+        mounting_points[std::string(((ntfs_md *)ntfs_mounts)[i].name) + ":"] = StringTools::strfmt("%s:(%s)",((ntfs_md *)ntfs_mounts)[i].name, ntfsGetVolumeName(((ntfs_md *)ntfs_mounts)[i].name));
     }
 
    for (std::map<std::string,std::string>::iterator it=mounting_points.begin(); it!=mounting_points.end(); ++it){

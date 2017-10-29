@@ -32,15 +32,10 @@ TARGET		:=	sdcafiine
 BUILD		:=	build
 BUILD_DBG	:=	$(TARGET)_dbg
 SOURCES		:=	src \
-				src/dynamic_libs \
-				src/kernel \
-				src/patcher \
 				src/common \
-				src/fs \
-				src/fs_wrapper \
-				src/system \
-				src/utils \
-
+				src/myfs \
+				src/myutils \
+				src/patcher \
 DATA		:=	
 
 INCLUDES	:=  src
@@ -61,7 +56,7 @@ MAKEFLAGS += --no-print-directory
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lm -lgcc -lfat -lntfs -liosuhax 
+LIBS	:= -lm -lgcc -lfat -lntfs -liosuhax -lfswrapper -lutils -ldynamiclibs 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -115,6 +110,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
                     -I$(PORTLIBS)/include -I$(PORTLIBS)/include/freetype2 \
 					-I$(CURDIR)/$(BUILD) -I$(LIBOGC_INC) \
+					-I$(PORTLIBS)/include/libutils  -I$(PORTLIBS)/include/libfswrapper  \
 					
 
 #---------------------------------------------------------------------------------

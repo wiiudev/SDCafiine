@@ -13,7 +13,6 @@ To achieve this, SDCafiine has a built-in a version of [mocha](https://github.co
 - **Built in libiosuhax support** via mocha
 - Supports loading files from **SD and USB** (FAT32 and NTFS)
 - Support for **multiple modpacks** for as single game.
-
 ## How to use it
 
 ### Installation of SDCafiine
@@ -72,6 +71,11 @@ For building you need:
 - [libfat](https://github.com/aliaspider/libfat/)
 - [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
 - [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
+- [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
+- [libutils](https://github.com/Maschell/libutils) for common functions.
+- [libfswrapper](https://github.com/Maschell/fs_wrapper) to replace the fs functions.
+
+Install them (in this order) according to their README's. Don't forget the dependencies of the libs itself.
 
 *note: when you change something in the mocha folder, you need to use make clean before building.*
 

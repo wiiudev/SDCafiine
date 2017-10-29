@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "os_defs.h"
+#include <dynamic_libs/os_defs.h>
 
 #define CAFE_OS_SD_PATH             "/vol/external01"
 #define GAME_MOD_FOLDER             "/sdcafiine"
@@ -41,41 +41,9 @@ extern "C" {
 #define DIR_IDENTIFY                "?"  /* maximum length = 1*/
 #define PARENT_DIR_IDENTIFY         "?.."
 
-/* Macros for libs */
-#define LIB_CORE_INIT           0
-#define LIB_NSYSNET             1
-#define LIB_GX2                 2
-#define LIB_AOC                 3
-#define LIB_AX                  4
-#define LIB_FS                  5
-#define LIB_OS                  6
-#define LIB_PADSCORE            7
-#define LIB_SOCKET              8
-#define LIB_SYS                 9
-#define LIB_VPAD                10
-#define LIB_NN_ACP              11
-#define LIB_SYSHID              12
-#define LIB_VPADBASE            13
-#define LIB_AX_OLD              14
-#define LIB_PROC_UI             15
-
-// functions types
-#define STATIC_FUNCTION         0
-#define DYNAMIC_FUNCTION        1
-
-// none dynamic libs
-#define LIB_LOADER              0x1001
-
-#ifndef MEM_BASE
-#define MEM_BASE                (0x00800000)
-#endif
-
 #define ELF_DATA_ADDR               (*(volatile unsigned int*)(MEM_BASE + 0x1300 + 0x00))
 #define ELF_DATA_SIZE               (*(volatile unsigned int*)(MEM_BASE + 0x1300 + 0x04))
 #define MAIN_ENTRY_ADDR             (*(volatile unsigned int*)(MEM_BASE + 0x1400 + 0x00))
-#define OS_FIRMWARE                 (*(volatile unsigned int*)(MEM_BASE + 0x1400 + 0x04))
-
-#define OS_SPECIFICS                ((OsSpecifics*)(MEM_BASE + 0x1500))
 
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS                0
