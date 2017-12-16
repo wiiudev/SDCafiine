@@ -40,7 +40,7 @@ install:
   - tar -xzvf libntfs.tar.gz
   - tar -xzvf fs_wrapper.tar.gz
   - 7z x -y ./dynamic_libs-lib/libs/portlibs.zip -o${DEVKITPRO}
-  - (cd libfat-master/wiiu && make -j8 && make install)
+  - (cd libfat-master && make wiiu-release && make wiiu-install)
   - (cd libiosuhax-master && make -j8 && make install)
   - (cd libntfs-master && make wiiu-install)
   - (cd dynamic_libs-lib && make -j8 && make install)
