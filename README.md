@@ -69,8 +69,8 @@ Make sure you download the complete repo, including the submodules:
 - git submodule update --init --recursive
 
 For building you need: 
-- [libfat](https://github.com/aliaspider/libfat/)
 - [libiosuhax](https://github.com/dimok789/libiosuhax) (Build WITHOUT the WUT flag set.)
+- [libfat](https://github.com/aliaspider/libfat/)
 - [libntfs](https://github.com/Maschell/libntfs-wiiu) (Build with make wiiu-install)
 - [dynamic_libs](https://github.com/Maschell/dynamic_libs/tree/lib) for access to the functions.
 - [libutils](https://github.com/Maschell/libutils) for common functions.
