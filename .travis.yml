@@ -42,7 +42,7 @@ install:
   - 7z x -y ./dynamic_libs-lib/libs/portlibs.zip -o${DEVKITPRO}
   - (cd libiosuhax-master && make -j8 && make install)
   - (cd libfat-master && make wiiu-release && make wiiu-install)
-  - (cd libntfs-master && make wiiu-install)
+  - (cd libntfs-wiiu-master && make wiiu-install)
   - (cd dynamic_libs-lib && make -j8 && make install)
   - (cd libutils-master && make -j8 && make install)
   - (cd fs_wrapper-master && make -j8 && make install)
