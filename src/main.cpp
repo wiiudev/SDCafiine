@@ -8,14 +8,14 @@
 #include "modpackSelector.h"
 #include "common/common.h"
 #include <iosuhax.h>
-#include "dynamic_libs/os_functions.h"
-#include "dynamic_libs/vpad_functions.h"
-#include "dynamic_libs/socket_functions.h"
-#include "dynamic_libs/sys_functions.h"
-#include "dynamic_libs/proc_ui_functions.h"
+#include <dynamic_libs/os_functions.h>
+#include <dynamic_libs/vpad_functions.h>
+#include <dynamic_libs/fs_functions.h>
+#include <dynamic_libs/socket_functions.h>
+#include <dynamic_libs/sys_functions.h>
+#include <dynamic_libs/proc_ui_functions.h>
 #include "patcher/fs_function_patcher.h"
-#include "utils/function_patcher.h"
-#include "kernel/kernel_functions.h"
+#include <utils/function_patcher.h>
 #include <fswrapper/FileReplacerUtils.h>
 #include "utils/logger.h"
 #include <fs/FSUtils.h>
@@ -63,7 +63,6 @@ extern "C" int Menu_Main(void){
     DEBUG_FUNCTION_LINE("Mount SD partition\n");
     Init_SD_USB();
 
-    SetupKernelCallback();
     //!*******************************************************************
     //!                        Patching functions                        *
     //!*******************************************************************
@@ -111,7 +110,6 @@ void ApplyPatches(){
 
 void RestorePatches(){
     RestoreInvidualInstructions(method_hooks_fs,        method_hooks_size_fs);
-    //KernelRestoreInstructions();
 }
 
 void deInit(){
