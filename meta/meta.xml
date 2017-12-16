@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app version="1">
+  <name>SDcafiine</name>
+  <coder>Chadderz Maschell</coder>
+  <url>https://github.com/Maschell/SDCafiine</url>
+  <version>v1.4-nightly-526319b</version>
+  <release_date>20171216114509</release_date>
+  <short_description>SDCafiine (HBL version)</short_description>
+  <long_description>Put your files into "SD:/sdcafiine/TITLEID/MODPACK/content" or "SD:/sdcafiine/TITLEID//MODPACKaoc" where TITLEID is your 16 byte long TileID.
+
+CREDITS : 
+Cafiine creation - chadderz (and MrBean35000vr ?) 
+Inital SDCafiine creation - golden45 (see https://gbatemp.net/goto/post?id=5680630) 
+HBL support and further improvements - Maschell
+minor improvements - Zarklord
+Icon and Meta by pwsincd
+  </long_description>
+  <category>tool</category>
+
+</app>
