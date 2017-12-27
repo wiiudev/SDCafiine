@@ -17,7 +17,7 @@
 #include "patcher/fs_function_patcher.h"
 #include <utils/function_patcher.h>
 #include <fswrapper/FileReplacerUtils.h>
-#include "utils/logger.h"
+#include <utils/logger.h>
 #include <fs/FSUtils.h>
 #include <utils/StringTools.h>
 #include "fs/sd_fat_devoptab.h"
@@ -56,7 +56,7 @@ extern "C" int Menu_Main(void){
 
     log_init();
 
-    setup_os_exceptions();
+    //setup_os_exceptions();
 
     gSDInitDone = 0;
 
@@ -69,6 +69,9 @@ extern "C" int Menu_Main(void){
     DEBUG_FUNCTION_LINE("Patching functions\n");
     ApplyPatches();
 
+    if(FileReplacerUtils::setGroupAndOwnerID()){
+        DEBUG_FUNCTION_LINE("SUCCESS\n");
+    }
     //FileReplacerUtils::getInstance()->StartAsyncThread();
 
     //gLastMetaPath[0] = 0;

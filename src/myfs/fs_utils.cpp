@@ -68,6 +68,7 @@ char * getPathWithNewBase(const char * inPath, const char * newBase){
     result = (char*)malloc((sizeof(char) * (strlen(newBase) +1+ strlen(relativePath))) + 1);
     if(result == NULL){
         DEBUG_FUNCTION_LINE("malloc for result failed.\n");
+        OSFATAL_FUNCTION_LINE("malloc for result failed.\n");
         return NULL;
     }
     sprintf(result,"%s/%s",newBase,relativePath);
@@ -109,6 +110,7 @@ char * getRelativePath(const char *path){
             pathForCheck = (char*)malloc(sizeof(CONTENT_FOLDER) + 1 + (sizeof(char) * (strlen(pathForCheckInternal) + 1)));
             if(pathForCheck == NULL){
                 DEBUG_FUNCTION_LINE("malloc failed\n");
+                OSFATAL_FUNCTION_LINE("malloc failed\n");
                 return NULL;
             }
             sprintf(pathForCheck,"%s/%s",CONTENT_FOLDER,pathForCheckInternal);
@@ -126,6 +128,7 @@ char * getRelativePath(const char *path){
             pathForCheck = (char*)malloc(sizeof(AOC_FOLDER) + 1 + (sizeof(char) * (strlen(pathForCheckInternal) + 1)));
             if(pathForCheck == NULL){
                 DEBUG_FUNCTION_LINE("malloc failed\n");
+                OSFATAL_FUNCTION_LINE("malloc failed\n");
                 return NULL;
             }
             sprintf(pathForCheck,"%s/%s",AOC_FOLDER,pathForCheckInternal);
@@ -133,6 +136,7 @@ char * getRelativePath(const char *path){
             pathForCheck = (char*)malloc(sizeof(CONTENT_FOLDER) + 1 + (sizeof(char) * (strlen(path) + 1)));
             if(pathForCheck == NULL){
                 DEBUG_FUNCTION_LINE("malloc failed\n");
+                OSFATAL_FUNCTION_LINE("malloc failed\n");
                 return NULL;
             }
             sprintf(pathForCheck,"%s/%s",CONTENT_FOLDER,path);
