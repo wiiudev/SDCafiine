@@ -1,4 +1,4 @@
-DO_LOGGING := 0
+DO_LOGGING := 1
 
 #---------------------------------------------------------------------------------
 # Clear the implicit built in rules
