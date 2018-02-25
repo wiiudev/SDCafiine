@@ -6,13 +6,13 @@ SDCafiine is a Homebrew Application for the Nintendo Wii U, that can be loaded w
 
 # Which games are supported
 In the past SDCafiine only supported games which already had access to the SD Card (for example Super Smash Bros. for Wii U), but **since version 1.4 all games are supported**.
-To achieve this, SDCafiine has a built-in a version of [mocha](https://github.com/dimok789/mocha), which is a Custom Firmware with [libiosuhax](https://github.com/dimok789/libiosuhax) support. This allows support for FAT32 devices via [libfat](https://github.com/aliaspider/libfat) and support for NTFS devices via [libntfs](https://github.com/Maschell/libntfs-wiiu).
+To achieve this, SDCafiine has a built-in a version of [mocha](https://github.com/dimok789/mocha), which is a Custom Firmware with [libiosuhax](https://github.com/dimok789/libiosuhax) support. This allows support for FAT32 devices via [libfat](https://github.com/aliaspider/libfat) and experimental support for NTFS devices via [libntfs](https://github.com/Maschell/libntfs-wiiu).
 
 # Features
 - On the fly file **replacing of game files**.
 - Support for **replacing files from downloadable content**
 - **Built in libiosuhax support** via mocha
-- Supports loading files from **SD and USB** (FAT32 and NTFS)
+- Supports loading files from **SD and USB** (FAT32 and NTFS (highly experimental, can lead to random crashes))
 - Support for **multiple modpacks** for as single game.
 ## How to use it
 
