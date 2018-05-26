@@ -11,10 +11,10 @@ endif
 ifeq ($(strip $(DEVKITPRO)),)
 $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPRO")
 endif
+
 export PATH			:=	$(DEVKITPPC)/bin:$(PORTLIBS)/bin:$(PATH)
-export LIBOGC_INC	:=	$(DEVKITPRO)/libogc/include
-export LIBOGC_LIB	:=	$(DEVKITPRO)/libogc/lib/wii
 export PORTLIBS		:=	$(DEVKITPRO)/portlibs/ppc
+export GCC_VER      := $(shell $(DEVKITPPC)/bin/powerpc-eabi-gcc -dumpversion)
 
 PREFIX	:=	powerpc-eabi-
 
@@ -38,6 +38,7 @@ SOURCES		:=	src \
 				src/myfs \
 				src/myutils \
 				src/patcher \
+
 DATA		:=	
 
 INCLUDES	:=  src
@@ -72,7 +73,7 @@ LIBS	:= -lm -lgcc -lfat -lntfs -liosuhax -lfswrapper -lutils -ldynamiclibs
 #---------------------------------------------------------------------------------
 LIBDIRS	:=	$(CURDIR)	\
 			$(DEVKITPPC)/lib  \
-			$(DEVKITPPC)/lib/gcc/powerpc-eabi/4.8.2
+			$(DEVKITPPC)/lib/gcc/powerpc-eabi/$(GCC_VER)
 
 
 #---------------------------------------------------------------------------------
@@ -117,7 +118,7 @@ export OFILES	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) \
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
                     -I$(PORTLIBS)/include -I$(PORTLIBS)/include/freetype2 \
-					-I$(CURDIR)/$(BUILD) -I$(LIBOGC_INC) \
+					-I$(CURDIR)/$(BUILD) \
 					-I$(PORTLIBS)/include/libutils  -I$(PORTLIBS)/include/libfswrapper  \
 					
 
